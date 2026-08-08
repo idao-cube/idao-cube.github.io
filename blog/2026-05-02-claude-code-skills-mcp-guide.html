@@ -1,0 +1,653 @@
+<!DOCTYPE html><html lang="zh-CN" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="color-scheme" content="light dark"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" href="/favicon.ico"><link rel="alternate" type="application/rss+xml" title="iDao技术魔方 RSS Feed" href="/rss.xml"><!-- Anti-FOUC: theme init runs before first paint --><script>
+      (function() {
+        var stored = localStorage.getItem('theme')
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Claude Code 进阶：32 个精选 Skills + 8 个 MCP 服务器实测指南 — iDao技术魔方</title><meta name="description" content="别再裸用 Claude Code 了！一篇讲透 Skills 与 MCP 的核心区别，亲测可用的一键安装命令和配置方案，让你的 AI 编程助手从补代码升级为全流程开发搭档。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="keywords" content="AI应用,全栈开发实战,AI应用落地,独立开发教程,iDao技术魔方,Claude,Claude Code,Skills,MCP,AI 应用,开发工具,教程"><!-- 作者信息（GEO：帮助大模型识别内容创作主体）--><meta name="author" content="iDao技术魔方"><!-- 技术信息 --><meta name="generator" content="Astro v6.1.9"><!-- 主题色（移动端浏览器标题栏着色，百度/Chrome 读取）--><meta name="theme-color" content="#0f172a"><!--Robots 指令: noindex/nofollow 精细控制 + 富摘要权限开放 --><meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- Googlebot 单独声明，优先级高于 robots --><meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- 百度蜘蛛单独声明 --><meta name="baiduspider" content="index"><!-- Canonical URL:   防止重复内容被搜索引擎分散权重 --><link rel="canonical" href="https://idao.fun/blog/2026-05-02-claude-code-skills-mcp-guide"><!--Open Graph（Facebook / 微信 / 百度 / 飞书等读取） --><meta property="og:type" content="article"><meta property="og:site_name" content="iDao技术魔方"><meta property="og:title" content="Claude Code 进阶：32 个精选 Skills + 8 个 MCP 服务器实测指南 — iDao技术魔方"><meta property="og:description" content="别再裸用 Claude Code 了！一篇讲透 Skills 与 MCP 的核心区别，亲测可用的一键安装命令和配置方案，让你的 AI 编程助手从补代码升级为全流程开发搭档。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta property="og:url" content="https://idao.fun/blog/2026-05-02-claude-code-skills-mcp-guide"><meta property="og:locale" content="zh_CN"><!-- OG 图片：补全 alt / width / height，避免社交平台爬取失败 --><meta property="og:image" content="https://idao.fun/og-default.jpg"><meta property="og:image:alt" content="Claude Code 进阶：32 个精选 Skills + 8 个 MCP 服务器实测指南 — iDao技术魔方"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/jpeg"><!-- 文章专属 OG（ogType='article' 时生效）--><meta property="article:published_time" content="2026-05-02T00:00:00.000Z"><meta property="article:author" content="iDao技术魔方"><!--Twitter / X Card：summary_large_image = 大图卡片，点击率更高 --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@idaocube"><meta name="twitter:creator" content="@idaocube"><meta name="twitter:title" content="Claude Code 进阶：32 个精选 Skills + 8 个 MCP 服务器实测指南 — iDao技术魔方"><meta name="twitter:description" content="别再裸用 Claude Code 了！一篇讲透 Skills 与 MCP 的核心区别，亲测可用的一键安装命令和配置方案，让你的 AI 编程助手从补代码升级为全流程开发搭档。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="twitter:image" content="https://idao.fun/og-default.jpg"><meta name="twitter:image:alt" content="Claude Code 进阶：32 个精选 Skills + 8 个 MCP 服务器实测指南 — iDao技术魔方"><meta name="baidu-site-verification" content="codeva-sdSzhlWkj2"><!-- JSON-LD 结构化数据：支持单个对象或数组，多 Schema 场景均兼容 /   GEO：结构化数据是大模型识别实体的最高优先级信号 --><script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://idao.fun/blog/2026-05-02-claude-code-skills-mcp-guide","headline":"Claude Code 进阶：32 个精选 Skills + 8 个 MCP 服务器实测指南","description":"别再裸用 Claude Code 了！一篇讲透 Skills 与 MCP 的核心区别，亲测可用的一键安装命令和配置方案，让你的 AI 编程助手从补代码升级为全流程开发搭档。","url":"https://idao.fun/blog/2026-05-02-claude-code-skills-mcp-guide","image":"https://idao.fun/og-default.jpg","inLanguage":"zh-CN","datePublished":"2026-05-02T00:00:00.000Z","dateModified":"2026-05-02T00:00:00.000Z","author":{"@id":"https://idao.fun/#person","name":"iDao"},"publisher":{"@id":"https://idao.fun/#person","name":"iDao技术魔方"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://idao.fun/blog/2026-05-02-claude-code-skills-mcp-guide"},"isPartOf":{"@id":"https://idao.fun/#website"},"keywords":"Claude, Claude Code, Skills, MCP, AI 应用, 开发工具, 教程"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun/"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"AI应用","item":"https://idao.fun/blog/category/AI应用"},{"@type":"ListItem","position":4,"name":"Claude Code 进阶：32 个精选 Skills + 8 个 MCP 服务器实测指南","item":"https://idao.fun/blog/2026-05-02-claude-code-skills-mcp-guide"}]}</script><script type="module">if(window.location.host==="idao.fun"){const t=window;t._hmt=t._hmt||[],(function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?15119693b771cc9cecf522df17636f96";var c=document.getElementsByTagName("script")[0];c.parentNode?.insertBefore(e,c)})()}</script><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-5R9SGFG1Z8"></script><script type="module">if(window.location.host==="idao.fun"){let t=function(...n){a.dataLayer.push(n)};const a=window;a.dataLayer=a.dataLayer||[],t("js",new Date),t("config","G-5R9SGFG1Z8")}</script><link rel="stylesheet" href="/_astro/seoHelpers.M1mEo6Z0.css"></head> <body class="min-h-screen bg-white font-sans text-primary antialiased dark:bg-[#0a0a0a] dark:text-[#ededed]"> <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-border dark:bg-[#0a0a0a]/80 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <nav class="mx-auto flex h-16 max-w-5xl items-center justify-between px-4"> <!-- Logo --> <a href="/" class="flex items-center gap-2 text-lg font-semibold tracking-[-0.02em] text-primary dark:text-[#ededed]"> <!-- <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white">i</span> --> <div class="h-6 w-6 bg-white rounded-lg flex items-center justify-center"> <img src="/favicon.svg" alt="iDao技术魔方" class="h-6 w-6"> </div> <span class="hidden sm:inline">iDao技术魔方</span> </a> <!-- PC Nav: hidden on mobile, flex on md+ --> <div class="hidden md:flex items-center gap-1"> <a href="/" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="relative px-3 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="absolute bottom-0 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-primary dark:bg-[#ededed]"></span> </a><a href="/utils" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <button id="theme-toggle" class="ml-2 flex items-center gap-1.5 rounded-md px-2 py-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式" title="切换暗色模式"> <svg class="block h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden text-sm">暗色</span> <span class="hidden dark:inline text-sm">亮色</span> </button> </div> <!-- Mobile Hamburger: hidden on md+ --> <button id="mobile-menu-toggle" class="md:hidden rounded-md p-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="打开导航菜单" title="打开导航菜单"> <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path> </svg> </button> </nav> <!-- Mobile Menu: hidden by default, toggled via JS --> <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 dark:border-[#1a1a1a] bg-white/80 backdrop-blur-md dark:bg-[#0a0a0a]/80"> <div class="mx-auto max-w-5xl flex flex-col px-4 py-3 gap-1"> <a href="/" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="ml-2 h-0.5 w-5 _inline-block rounded-full bg-primary dark:bg-[#ededed] hidden sm:inline-block"></span> </a><a href="/utils" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <!-- Mobile Theme Toggle --> <button id="mobile-theme-toggle" class="mt-2 flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式"> <svg class="block h-4 w-4 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-4 w-4 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden">切换到暗色模式</span> <span class="hidden dark:inline">切换到亮色模式</span> </button> </div> </div> </header> <script type="module">function o(e){const l=document.getElementById(e);l&&l.addEventListener("click",()=>{const i=document.documentElement.classList.toggle("dark");localStorage.setItem("theme",i?"dark":"light"),l.setAttribute("aria-label",i?"切换到亮色模式":"切换暗色模式")})}o("theme-toggle");o("mobile-theme-toggle");const n=document.getElementById("mobile-menu-toggle"),t=document.getElementById("mobile-menu");n?.addEventListener("click",()=>{t?.classList.toggle("hidden");const e=!t?.classList.contains("hidden");n.setAttribute("aria-label",e?"关闭导航菜单":"打开导航菜单")});t?.querySelectorAll("a").forEach(e=>{e.addEventListener("click",()=>{t?.classList.add("hidden"),n?.setAttribute("aria-label","打开导航菜单")})});</script> <main class="mx-auto max-w-5xl px-4 py-8">  <article class="prose mx-auto max-w-3xl dark:prose-invert"> <a href="/blog" class="text-sm text-[#666] dark:text-[#a3a3a3] no-underline">← 返回博客</a> <nav aria-label="面包屑导航" class="mb-6"> <ol class="flex flex-wrap items-center gap-1 text-sm text-[#666] dark:text-[#a3a3a3] px-0"> <li class="flex items-center gap-1">  <a href="https://idao.fun" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">首页</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">博客</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog/category/AI应用" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">AI应用</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <span class="text-primary dark:text-[#ededed] hidden sm:inline" aria-current="page">Claude Code 进阶：32 个精选 Skills + 8 个 MCP 服务器实测指南</span> </li> </ol> </nav> <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"AI应用","item":"https://idao.fun/blog/category/AI应用"},{"@type":"ListItem","position":4,"name":"Claude Code 进阶：32 个精选 Skills + 8 个 MCP 服务器实测指南","item":""}]}</script>  <header class="not-prose mb-8"> <h1 class="text-3xl font-bold tracking-[-0.02em] text-primary dark:text-[#ededed]">Claude Code 进阶：32 个精选 Skills + 8 个 MCP 服务器实测指南</h1> <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-[#666] dark:text-[#a3a3a3]"> <time datetime="2026-05-02T00:00:00.000Z"> 2026年5月2日 </time>  <a href="/blog/category/AI应用" class="rounded-md bg-[#fafafa] px-2.5 py-1 text-[#4d4d4d] transition hover:bg-gray-100 dark:bg-[#262626] dark:text-[#a3a3a3] dark:hover:bg-[#333]"> AI应用 </a> </div> <div class="mt-3 flex flex-wrap gap-2"> <a href="/blog/tag/Claude" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Claude </a><a href="/blog/tag/Claude Code" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Claude Code </a><a href="/blog/tag/Skills" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Skills </a><a href="/blog/tag/MCP" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#MCP </a><a href="/blog/tag/AI 应用" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#AI 应用 </a><a href="/blog/tag/开发工具" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#开发工具 </a><a href="/blog/tag/教程" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#教程 </a> </div> </header>  <p>你是不是也有这样的困扰：</p>
+<ul>
+<li>用 Claude Code 写代码，总觉得它不够懂需求，生成的内容还要反复修改</li>
+<li>想让它做个 Dashboard / 落地页，结果生成的界面丑到没法直接用</li>
+<li>想让它读写本地文件、操作浏览器、联动设计工具，却完全不知道怎么配置</li>
+<li>会话一清空，之前的调试经验、项目细节全忘了，每次都要重新铺垫上下文</li>
+</ul>
+<p>这篇文章整理了 <strong>32 个精选 Skills + 8 个 MCP 服务器</strong>，全部分享给你。一键安装、自动触发，让你的 Claude Code 从「只会补代码的助手」，变成「能帮你搞定全流程的开发搭档」。</p>
+<hr>
+<h2 id="一先搞懂核心skills-vs-mcp-到底有啥区别">一、先搞懂核心：Skills vs MCP 到底有啥区别？</h2>
+<p>很多新手刚上手会搞混这两个扩展能力，先一句话讲透：</p>
+<ul>
+<li><strong>Skills</strong>：封装好的提示词 / 标准化工作流，让 Claude 变成特定领域的「专业人士」，本质是让 AI <strong>更懂怎么干</strong></li>
+<li><strong>MCP 服务器</strong>：真正的工具能力，能让 Claude 访问本地文件、浏览器、外部 API、第三方工具，本质是让 AI <strong>真的能去干</strong></li>
+</ul>
+<blockquote>
+<p>绝大多数能力都会<strong>自动触发</strong>，你不需要手动调用。当你说「帮我写个 README」「审查一下这段代码」时，Claude Code 会自动激活对应的能力。</p>
+</blockquote>
+<h3 id="核心区别对照表">核心区别对照表</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>对比维度</th><th>Skills 技能</th><th>MCP 服务器</th></tr></thead><tbody><tr><td>核心本质</td><td>提示词 / 标准化工作流封装</td><td>本地运行的工具 / API 服务</td></tr><tr><td>安装方式</td><td><code>npx skills add</code> 一键安装</td><td>修改 <code>mcp.json</code> 配置文件</td></tr><tr><td>运行位置</td><td>Claude 大模型内部</td><td>本地独立进程</td></tr><tr><td>访问外部资源</td><td>不支持</td><td>支持本地系统、浏览器、第三方服务</td></tr><tr><td>额外依赖</td><td>仅需 node 环境，无需 API Key</td><td>部分服务需要 API Key</td></tr></tbody></table>
+<p><strong>一句话总结：Skills 让 Claude 更聪明，MCP 让 Claude 更能干，两者搭配使用才能把能力拉满。</strong></p>
+<hr>
+<h2 id="二skills-技能全指南32-个精选">二、Skills 技能全指南（32 个精选）</h2>
+<p>技能是 Claude Code 最轻量化的扩展方式，通过 Skills CLI 即可一键安装，类似前端常用的 npm 包管理器。</p>
+<h3 id="21-前置必看技能安装与管理">2.1 前置必看：技能安装与管理</h3>
+<h4 id="核心安装命令">核心安装命令</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 1. 搜索社区技能（关键词匹配）</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> find</span><span style="color:#ABB2BF"> &#x3C;</span><span style="color:#98C379">关键</span><span style="color:#ABB2BF">词></span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 2. 安装技能（-y 跳过确认，-g 全局安装，必加！）</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#ABB2BF"> &#x3C;</span><span style="color:#98C379">owner/repo@skil</span><span style="color:#ABB2BF">l> </span><span style="color:#D19A66">-y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 3. 查看已安装的全部技能</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> list</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 4. 检查技能更新</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> check</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 5. 更新所有已安装技能</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> update</span></span></code></pre>
+<blockquote>
+<p>关键提醒：安装技能<strong>必须加 <code>-g</code> 全局安装参数</strong>，否则 Claude Code 无法识别；安装完成后<strong>必须重启 Claude Code</strong> 才能生效。</p>
+</blockquote>
+<h4 id="技能市场">技能市场</h4>
+<p>所有社区开源技能均可在官方市场查看：<a href="https://skills.sh/">skills.sh</a>，有完整的安装量排行榜，帮你快速筛选热门优质技能。</p>
+<h4 id="已安装技能查看方式">已安装技能查看方式</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># Mac/Linux</span></span>
+<span class="line"><span style="color:#61AFEF">ls</span><span style="color:#98C379"> ~/.claude/skills/</span></span>
+<span class="line"><span style="color:#61AFEF">ls</span><span style="color:#98C379"> ~/.agents/skills/</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Windows</span></span>
+<span class="line"><span style="color:#61AFEF">dir</span><span style="color:#98C379"> C:</span><span style="color:#56B6C2">\U</span><span style="color:#98C379">sers</span><span style="color:#56B6C2">\你</span><span style="color:#98C379">的用户名</span><span style="color:#56B6C2">\.</span><span style="color:#98C379">claude</span><span style="color:#56B6C2">\s</span><span style="color:#98C379">kills</span><span style="color:#56B6C2">\</span></span></code></pre>
+<p>Claude Code 内直接输入 <code>/</code> 即可唤起完整技能列表，点击即可手动触发。</p>
+<hr>
+<h3 id="22-32-个精选技能分类清单">2.2 32 个精选技能分类清单</h3>
+<p>所有技能按开发场景分类，标注安装命令、核心能力和触发场景。</p>
+<h4 id="-必装入口类1-个">🔧 必装入口类（1 个）</h4>
+<p><strong>find-skills — 技能发现神器</strong></p>
+<ul>
+<li>安装：<code>npx skills add find-skills -y -g</code></li>
+<li>能力：技能市场的内置搜索引擎，支持关键词匹配、热门推荐</li>
+<li>触发：当你说「有没有处理 PDF 的技能」时自动激活</li>
+<li>感受：所有新手第一个必装的技能，相当于给 Claude 装了个「应用商店」</li>
+</ul>
+<h4 id="-前端开发全栈类9-个">🎨 前端开发全栈类（9 个）</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>技能</th><th>安装命令</th><th>核心能力</th><th>安装量</th></tr></thead><tbody><tr><td><strong>frontend-design</strong></td><td><code>npx skills add frontend-design -y -g</code></td><td>网页/Dashboard/落地页设计</td><td>52.7K</td></tr><tr><td><strong>web-artifacts-builder</strong></td><td><code>npx skills add web-artifacts-builder -y -g</code></td><td>复杂 SPA、带组件库的前端项目</td><td>-</td></tr><tr><td><strong>canvas-design</strong></td><td><code>npx skills add canvas-design -y -g</code></td><td>架构图、流程图、可视化绘图</td><td>6.1K</td></tr><tr><td><strong>theme-factory</strong></td><td><code>npx skills add theme-factory -y -g</code></td><td>主题美化、视觉风格统一</td><td>-</td></tr><tr><td><strong>vercel-react-best-practices</strong></td><td><code>npx skills add vercel-labs/agent-skills@vercel-react-best-practices -y -g</code></td><td>React 开发最佳实践</td><td>109.8K</td></tr><tr><td><strong>web-design-guidelines</strong></td><td><code>npx skills add vercel-labs/agent-skills@web-design-guidelines -y -g</code></td><td>网页设计规范与 UI 优化</td><td>83.1K</td></tr><tr><td><strong>vercel-composition-patterns</strong></td><td><code>npx skills add vercel-labs/agent-skills@vercel-composition-patterns -y -g</code></td><td>组件组合模式与复用策略</td><td>29.7K</td></tr><tr><td><strong>shadcn</strong></td><td><code>npx skills add shadcn/ui@shadcn -y -g</code></td><td>shadcn/ui 组件库专属支持</td><td>-</td></tr><tr><td><strong>vercel-react-native-skills</strong></td><td><code>npx skills add vercel-labs/agent-skills@vercel-react-native-skills -y -g</code></td><td>React Native 开发指导</td><td>21.6K</td></tr></tbody></table>
+<h4 id="-文档与办公处理类6-个">📄 文档与办公处理类（6 个）</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>技能</th><th>安装命令</th><th>核心能力</th></tr></thead><tbody><tr><td><strong>technical-writer</strong></td><td><code>npx skills add technical-writer -y -g</code></td><td>标准化 README、API 文档、技术教程</td></tr><tr><td><strong>doc-coauthoring</strong></td><td><code>npx skills add doc-coauthoring -y -g</code></td><td>技术提案（RFC）、系统设计文档</td></tr><tr><td><strong>docx</strong></td><td><code>npx skills add docx -y -g</code></td><td>Word 文档创建、编辑、格式转换</td></tr><tr><td><strong>pptx</strong></td><td><code>npx skills add pptx -y -g</code></td><td>PPT 演示文稿生成与编辑</td></tr><tr><td><strong>pdf</strong></td><td><code>npx skills add pdf -y -g</code></td><td>PDF 合并/拆分/OCR/水印</td></tr><tr><td><strong>xlsx</strong></td><td><code>npx skills add xlsx -y -g</code></td><td>Excel 数据清洗、公式计算、图表</td></tr></tbody></table>
+<h4 id="️-架构设计与代码质量类5-个">🏗️ 架构设计与代码质量类（5 个）</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>技能</th><th>安装命令</th><th>核心能力</th></tr></thead><tbody><tr><td><strong>planning-with-files</strong></td><td><code>npx skills add planning-with-files -y -g</code></td><td>复杂任务拆解、进度追踪、会话恢复</td></tr><tr><td><strong>project-planner</strong></td><td><code>npx skills add shubhamsaboo/awesome-llm-apps@project-planner -y -g</code></td><td>需求文档、架构设计、开发计划</td></tr><tr><td><strong>architecture-patterns</strong></td><td><code>npx skills add wshobson/agents@architecture-patterns -y -g</code></td><td>架构模式推荐与设计指导</td></tr><tr><td><strong>architecture-decision-records</strong></td><td><code>npx skills add wshobson/agents@architecture-decision-records -y -g</code></td><td>ADR 架构决策记录生成</td></tr><tr><td><strong>requesting-code-review</strong></td><td><code>npx skills add obra/superpowers@requesting-code-review -y -g</code></td><td>专业代码审查、质量优化</td></tr></tbody></table>
+<h4 id="-记忆与上下文管理类3-个">🧠 记忆与上下文管理类（3 个）</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>技能</th><th>安装命令</th><th>核心能力</th></tr></thead><tbody><tr><td><strong>memory-intake</strong></td><td><code>npx skills add memory-intake -y -g</code></td><td>经验/踩坑记录/项目规范写入记忆库</td></tr><tr><td><strong>memory-audit</strong></td><td><code>npx skills add memory-audit -y -g</code></td><td>记忆库健康检查、无效内容清理</td></tr><tr><td><strong>memory-evolution</strong></td><td><code>npx skills add memory-evolution -y -g</code></td><td>记忆库优化、关联结构整理</td></tr></tbody></table>
+<h4 id="-测试与自动化类2-个">🧪 测试与自动化类（2 个）</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>技能</th><th>安装命令</th><th>核心能力</th></tr></thead><tbody><tr><td><strong>webapp-testing</strong></td><td><code>npx skills add webapp-testing -y -g</code></td><td>基于 Playwright 的 E2E 测试</td></tr><tr><td><strong>test-driven-development</strong></td><td><code>npx skills add obra/superpowers@test-driven-development -y -g</code></td><td>TDD 红绿重构循环引导</td></tr></tbody></table>
+<h4 id="-开发提效类4-个">⚡ 开发提效类（4 个）</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>技能</th><th>安装命令</th><th>核心能力</th></tr></thead><tbody><tr><td><strong>brainstorming</strong></td><td><code>npx skills add obra/superpowers@brainstorming -y -g</code></td><td>多角度分析，快速生成方案</td></tr><tr><td><strong>systematic-debugging</strong></td><td><code>npx skills add obra/superpowers@systematic-debugging -y -g</code></td><td>结构化 bug 排查、根因定位</td></tr><tr><td><strong>writing-plans</strong></td><td><code>npx skills add obra/superpowers@writing-plans -y -g</code></td><td>开发任务拆解、实施计划</td></tr><tr><td><strong>executing-plans</strong></td><td><code>npx skills add obra/superpowers@executing-plans -y -g</code></td><td>按计划分步执行、进度追踪</td></tr></tbody></table>
+<h4 id="-安全审计类1-个">🔒 安全审计类（1 个）</h4>
+<ul>
+<li><strong>audit-website</strong>：<code>npx skills add squirrelscan/skills@audit-website -y -g</code> — 网站安全漏洞扫描，安装量 15.3K</li>
+</ul>
+<h4 id="️-自定义技能开发类1-个">🛠️ 自定义技能开发类（1 个）</h4>
+<ul>
+<li><strong>skill-creator</strong>：<code>npx skills add skill-creator -y -g</code> — 引导创建自定义技能，封装重复工作流</li>
+</ul>
+<hr>
+<h3 id="23-拿来即用分场景一键安装脚本">2.3 拿来即用：分场景一键安装脚本</h3>
+<h4 id="新手入门包10-个必装">新手入门包（10 个必装）</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic">#!/bin/bash</span></span>
+<span class="line"><span style="color:#56B6C2">set</span><span style="color:#D19A66"> -e</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> find-skills</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> frontend-design</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> technical-writer</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> docx</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> pptx</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> pdf</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> obra/superpowers@requesting-code-review</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> obra/superpowers@brainstorming</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> obra/superpowers@systematic-debugging</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#56B6C2">echo</span><span style="color:#98C379"> "✅ 新手入门包安装完成！重启 Claude Code 即可生效"</span></span></code></pre>
+<h4 id="前端开发者专属包">前端开发者专属包</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic">#!/bin/bash</span></span>
+<span class="line"><span style="color:#56B6C2">set</span><span style="color:#D19A66"> -e</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> find-skills</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> frontend-design</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> web-artifacts-builder</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> canvas-design</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> theme-factory</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> vercel-labs/agent-skills@vercel-react-best-practices</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> vercel-labs/agent-skills@web-design-guidelines</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> vercel-labs/agent-skills@vercel-composition-patterns</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> shadcn/ui@shadcn</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> webapp-testing</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> obra/superpowers@requesting-code-review</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> obra/superpowers@systematic-debugging</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> technical-writer</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#56B6C2">echo</span><span style="color:#98C379"> "✅ 前端开发者专属包安装完成！重启 Claude Code 即可生效"</span></span></code></pre>
+<h4 id="全栈开发全能包全部-32-个">全栈开发全能包（全部 32 个）</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic">#!/bin/bash</span></span>
+<span class="line"><span style="color:#56B6C2">set</span><span style="color:#D19A66"> -e</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 🔧 必装入口</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> find-skills</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 🎨 前端开发全栈类</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> frontend-design</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> web-artifacts-builder</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> canvas-design</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> theme-factory</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> vercel-labs/agent-skills@vercel-react-best-practices</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> vercel-labs/agent-skills@web-design-guidelines</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> vercel-labs/agent-skills@vercel-composition-patterns</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> shadcn/ui@shadcn</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> vercel-labs/agent-skills@vercel-react-native-skills</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 📄 文档办公</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> technical-writer</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> doc-coauthoring</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> docx</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> pptx</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> pdf</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> xlsx</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 🏗️ 架构与代码质量</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> planning-with-files</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> shubhamsaboo/awesome-llm-apps@project-planner</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> wshobson/agents@architecture-patterns</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> wshobson/agents@architecture-decision-records</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> obra/superpowers@requesting-code-review</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 🧠 记忆管理</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> memory-intake</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> memory-audit</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> memory-evolution</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 🧪 测试自动化</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> webapp-testing</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> obra/superpowers@test-driven-development</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># ⚡ 开发提效</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> obra/superpowers@brainstorming</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> obra/superpowers@systematic-debugging</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> obra/superpowers@writing-plans</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> obra/superpowers@executing-plans</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 🔒 安全审计</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> squirrelscan/skills@audit-website</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 🛠️ 自定义技能</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> skills</span><span style="color:#98C379"> add</span><span style="color:#98C379"> skill-creator</span><span style="color:#D19A66"> -y</span><span style="color:#D19A66"> -g</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#56B6C2">echo</span><span style="color:#98C379"> "✅ 全栈开发全能包安装完成！重启 Claude Code 即可生效"</span></span></code></pre>
+<hr>
+<h2 id="三mcp-服务器全指南8-个亲测可用">三、MCP 服务器全指南（8 个亲测可用）</h2>
+<p>MCP（Model Context Protocol）是 Claude Code 更底层的扩展机制，能让 Claude 突破大模型的限制，真正访问本地文件系统、浏览器、数据库、第三方工具。</p>
+<h3 id="31-前置必看mcp-配置全流程">3.1 前置必看：MCP 配置全流程</h3>
+<h4 id="配置文件路径">配置文件路径</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 全局配置（所有项目生效，推荐）</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Mac/Linux</span></span>
+<span class="line"><span style="color:#ABB2BF">~/.claude/mcp.json</span></span>
+<span class="line"><span style="color:#ABB2BF">~/.claude/mcp.local.json</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Windows</span></span>
+<span class="line"><span style="color:#61AFEF">C:\Users\你的用户名\.claude\mcp.json</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 项目级配置（仅当前项目生效）</span></span>
+<span class="line"><span style="color:#61AFEF">项目根目录/.mcp.json</span></span></code></pre>
+<h4 id="标准配置格式">标准配置格式</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "服务器名称"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"执行命令"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"命令参数"</span><span style="color:#ABB2BF">],</span></span>
+<span class="line"><span style="color:#E06C75">      "env"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">        "环境变量名"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"环境变量值"</span></span>
+<span class="line"><span style="color:#ABB2BF">      }</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre>
+<blockquote>
+<p>⚠️ 修改配置文件后<strong>必须重启 Claude Code</strong> 才能生效。生效后，输入框下方会显示「工具」图标，点击即可查看已连接的 MCP 服务器。</p>
+</blockquote>
+<hr>
+<h3 id="32-8-个精选-mcp-服务器清单">3.2 8 个精选 MCP 服务器清单</h3>
+<h4 id="-neural-memory--神经网络记忆系统">🧠 neural-memory — 神经网络记忆系统</h4>
+<p>解决痛点：技能里的记忆功能是轻量版，需要更强大的跨会话记忆能力。</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 安装（二选一）</span></span>
+<span class="line"><span style="color:#61AFEF">pip</span><span style="color:#98C379"> install</span><span style="color:#98C379"> neural-memory</span><span style="color:#7F848E;font-style:italic">     # Python 方式（推荐）</span></span>
+<span class="line"><span style="color:#61AFEF">npm</span><span style="color:#98C379"> install</span><span style="color:#D19A66"> -g</span><span style="color:#98C379"> neural-memory</span><span style="color:#7F848E;font-style:italic">  # Node 方式</span></span></code></pre>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "neural-memory"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"neural-memory"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"--mcp"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre>
+<p>核心能力：跨会话长期记忆、神经元结构化记忆模型、知识图谱可视化。纯本地运行，无需 API Key。</p>
+<h4 id="-playwright--浏览器自动化">🌐 playwright — 浏览器自动化</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "playwright"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"npx"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"-y"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"@playwright/mcp@latest"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre>
+<p>全浏览器支持，可执行 E2E 测试、页面自动化、视频录制。无需 API Key。</p>
+<h4 id="-filesystem--文件系统访问">📁 filesystem — 文件系统访问</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "filesystem"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"npx"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"-y"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"@modelcontextprotocol/server-filesystem"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"/Users/你的用户名/开发工作区路径"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre>
+<blockquote>
+<p>⚠️ 严禁开放系统根目录，仅授权开发工作区目录即可。</p>
+</blockquote>
+<h4 id="-sequential-thinking--链式推理增强">🤔 sequential-thinking — 链式推理增强</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "sequential-thinking"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"npx"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"-y"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"@modelcontextprotocol/server-sequential-thinking"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre>
+<p>把复杂问题拆成多步结构化推理，处理复杂算法、架构设计问题时效果拔群。</p>
+<h4 id="-web-reader--网页内容抓取">🌐 web-reader — 网页内容抓取</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "web_reader"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"npx"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"-y"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"web-reader-mcp"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre>
+<p>抓取公开网页内容并转为 Markdown，自动过滤广告。仅能访问公开页面。</p>
+<h4 id="-figma-developer-mcp--figma-设计稿读取">🎨 figma-developer-mcp — Figma 设计稿读取</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "figma-developer-mcp"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"npx"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"-y"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"figma-developer-mcp"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"--stdio"</span><span style="color:#ABB2BF">],</span></span>
+<span class="line"><span style="color:#E06C75">      "env"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">        "FIGMA_API_KEY"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"你的 Figma Personal Access Token"</span></span>
+<span class="line"><span style="color:#ABB2BF">      }</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre>
+<p>自动提取颜色、字体、尺寸等设计规范，生成 HTML/CSS 代码。需 Figma API Key。</p>
+<h4 id="-supercharged-figma--figma-实时编辑">🎨 supercharged-figma — Figma 实时编辑</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "supercharged-figma"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"npx"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"-y"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"supercharged-figma-mcp"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"--local"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"--relay-host"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"127.0.0.1"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"--relay-port"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"8888"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre>
+<p>可在 Figma 画布上实时创建、删除、修改图层，无需 API Key。需配合 Figma 插件使用。</p>
+<h4 id="️-4_5v_mcp--ai-图片分析">🖼️ 4_5v_mcp — AI 图片分析</h4>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "mcpServers"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "4_5v_mcp"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">      "command"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"npx"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">      "args"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"-y"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"4_5v_mcp"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre>
+<p>分析图片内容、识别 UI 组件、描述图片场景。部分版本可能需要 API Key。</p>
+<hr>
+<h3 id="33-api-key-汇总表">3.3 API Key 汇总表</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>MCP 服务器</th><th>需要 API Key？</th><th>备注</th></tr></thead><tbody><tr><td>neural-memory</td><td>❌</td><td>纯本地</td></tr><tr><td>playwright</td><td>❌</td><td>纯本地</td></tr><tr><td>filesystem</td><td>❌</td><td>纯本地</td></tr><tr><td>sequential-thinking</td><td>❌</td><td>纯本地</td></tr><tr><td>web-reader</td><td>❌</td><td>纯本地</td></tr><tr><td>figma-developer-mcp</td><td>✅</td><td>Figma Token</td></tr><tr><td>supercharged-figma</td><td>❌</td><td>需 Figma 插件</td></tr><tr><td>4_5v_mcp</td><td>⚠️</td><td>视实现而定</td></tr></tbody></table>
+<hr>
+<h2 id="四亲测踩坑避坑指南">四、亲测踩坑避坑指南</h2>
+<h3 id="skills-安装与使用高频坑">Skills 安装与使用高频坑</h3>
+<ol>
+<li><strong>安装超时/失败</strong>：确保网络稳定，能正常访问 npm 官方源</li>
+<li><strong>安装了不显示</strong>：必须加 <code>-g</code> 参数，安装后重启 Claude Code</li>
+<li><strong>技能不自动触发</strong>：检查提问关键词是否匹配，或手动输入 <code>/</code> + 技能名</li>
+<li><strong>Claude 响应变慢</strong>：不要一次性装超过 20 个冗余技能，按需安装即可</li>
+<li><strong>技能更新失败</strong>：更新前先关闭 Claude Code，避免文件占用</li>
+</ol>
+<h3 id="mcp-配置与生效高频坑">MCP 配置与生效高频坑</h3>
+<ol>
+<li><strong>配置完不生效</strong>：先检查 JSON 格式是否正确，然后重启 Claude Code</li>
+<li><strong>文件系统访问失败</strong>：仅指定工作区目录，检查目录读写权限</li>
+<li><strong>Figma MCP 连不上</strong>：确认 Token 权限、网络可访问 Figma</li>
+<li><strong>工具调用报错</strong>：检查 MCP 依赖是否提前安装完成</li>
+<li><strong>Windows 路径问题</strong>：路径分隔符用 <code>\</code>，不要用 <code>/</code></li>
+</ol>
+<h3 id="安全红线">安全红线</h3>
+<ul>
+<li>文件系统 MCP <strong>严禁开放系统根目录</strong></li>
+<li>第三方工具优先选择官方、社区热门的开源项目</li>
+<li>API Key 不要提交到 Git 仓库</li>
+<li>不要给 Claude 过高系统权限</li>
+</ul>
+<hr>
+<h2 id="五总结与新手推荐安装顺序">五、总结与新手推荐安装顺序</h2>
+<p>Skills 和 MCP 是两套互补的扩展机制，搭配使用才能把 Claude Code 的能力发挥到极致。</p>
+<p><strong>新手推荐安装顺序</strong>：</p>
+<ol>
+<li>先装 <code>find-skills</code> — 相当于装了应用商店</li>
+<li>安装新手入门包的 10 个必装技能，先上手体验</li>
+<li>配置 <code>neural-memory</code> MCP — 解决跨会话记忆丢失的核心痛点</li>
+<li>根据自己的开发场景，按需安装对应的技能和 MCP</li>
+<li>慢慢探索进阶玩法，开发自己的专属技能和 MCP</li>
+</ol>
+<blockquote>
+<p>所有命令和配置均适配 Windows / Mac / Linux 全平台。</p>
+</blockquote>   </article>  </main> <footer class="shadow-border bg-[#fafafa] dark:bg-[#0a0a0a] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <div class="mx-auto max-w-5xl px-4 py-12"> <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">iDao技术魔方</h3> <p class="text-sm leading-relaxed text-[#4d4d4d] dark:text-[#a3a3a3]">一枚全职独立开发者，懂全栈、爱开源、专注做优质技术内容，坐标成都。原创全栈技术内容，开源项目分享。</p> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">快速链接</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/blog" class="transition hover:text-primary dark:hover:text-[#ededed]">技术博客</a></li> <li><a href="/projects" class="transition hover:text-primary dark:hover:text-[#ededed]">开源项目</a></li> <li><a href="/utils" class="transition hover:text-primary dark:hover:text-[#ededed]">工具集</a></li> <li><a href="/ai" class="transition hover:text-primary dark:hover:text-[#ededed]">AI精选</a></li> <li><a href="/service" class="transition hover:text-primary dark:hover:text-[#ededed]">技术服务</a></li> <li><a href="/about" class="transition hover:text-primary dark:hover:text-[#ededed]">关于博主</a></li> <li><a href="/links" class="transition hover:text-primary dark:hover:text-[#ededed]">友情链接</a></li> <li><a href="/sponsor" class="transition hover:text-primary dark:hover:text-[#ededed]">赞助支持</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">联系</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="https://github.com/idao-cube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">GitHub</a></li> <li><a href="https://x.com/idaocube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">Twitter</a></li> <li><a href="mailto:hi@idao.fun" class="transition hover:text-primary dark:hover:text-[#ededed]">hi@idao.fun</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">其他</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/sitemap" class="transition hover:text-primary dark:hover:text-[#ededed]">站点地图</a></li> <li><a href="/privacy" class="transition hover:text-primary dark:hover:text-[#ededed]">隐私政策</a></li> <li><a href="/terms" class="transition hover:text-primary dark:hover:text-[#ededed]">服务条款</a></li> <li><a href="/search" class="transition hover:text-primary dark:hover:text-[#ededed]">站内搜索</a></li> </ul> </div> </div> <div class="mt-8 border-t border-gray-200 pt-6 text-center text-xs text-gray-500 dark:border-[#262626]"> <p>&copy; 2026 iDao技术魔方. All rights reserved. </p> <p class="pt-2">玩转技术魔方，创造数字未来 </p> <p class="pt-2">AI 友好索引：<a href="/llms.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms.txt</a> · <a href="/llms-full.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms-full.txt</a> · <a href="/sitemap.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">sitemap.xml</a> · <a href="/urls.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">urls.txt</a> · <a href="/rss.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">RSS</a></p> </div> </div> </footer> </body></html>

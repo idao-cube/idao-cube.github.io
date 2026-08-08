@@ -1,0 +1,226 @@
+<!DOCTYPE html><html lang="zh-CN" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="color-scheme" content="light dark"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" href="/favicon.ico"><link rel="alternate" type="application/rss+xml" title="iDao技术魔方 RSS Feed" href="/rss.xml"><!-- Anti-FOUC: theme init runs before first paint --><script>
+      (function() {
+        var stored = localStorage.getItem('theme')
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>OpenMontage 架构深潜：当一个 LLM Agent 成为控制平面，代码该长什么样？ — iDao技术魔方</title><meta name="description" content="跳过营销话术，我们钻进 OpenMontage 的 tools/、schemas/ 与 checkpoint 系统，看它如何用 YAML + Markdown 替代传统编排器，以及这套'技能即智能'的设计在工程上是否站得住脚。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="keywords" content="AI基础设施,全栈开发实战,AI应用落地,独立开发教程,iDao技术魔方,AI 应用,开源,AI Agent,OpenMontage,视频制作,系统设计"><!-- 作者信息（GEO：帮助大模型识别内容创作主体）--><meta name="author" content="iDao技术魔方"><!-- 技术信息 --><meta name="generator" content="Astro v6.1.9"><!-- 主题色（移动端浏览器标题栏着色，百度/Chrome 读取）--><meta name="theme-color" content="#0f172a"><!--Robots 指令: noindex/nofollow 精细控制 + 富摘要权限开放 --><meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- Googlebot 单独声明，优先级高于 robots --><meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- 百度蜘蛛单独声明 --><meta name="baiduspider" content="index"><!-- Canonical URL:   防止重复内容被搜索引擎分散权重 --><link rel="canonical" href="https://idao.fun/blog/2026-07-08-openmontage-architecture-deep-dive"><!--Open Graph（Facebook / 微信 / 百度 / 飞书等读取） --><meta property="og:type" content="article"><meta property="og:site_name" content="iDao技术魔方"><meta property="og:title" content="OpenMontage 架构深潜：当一个 LLM Agent 成为控制平面，代码该长什么样？ — iDao技术魔方"><meta property="og:description" content="跳过营销话术，我们钻进 OpenMontage 的 tools/、schemas/ 与 checkpoint 系统，看它如何用 YAML + Markdown 替代传统编排器，以及这套'技能即智能'的设计在工程上是否站得住脚。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta property="og:url" content="https://idao.fun/blog/2026-07-08-openmontage-architecture-deep-dive"><meta property="og:locale" content="zh_CN"><!-- OG 图片：补全 alt / width / height，避免社交平台爬取失败 --><meta property="og:image" content="https://idao.fun/og-default.jpg"><meta property="og:image:alt" content="OpenMontage 架构深潜：当一个 LLM Agent 成为控制平面，代码该长什么样？ — iDao技术魔方"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/jpeg"><!-- 文章专属 OG（ogType='article' 时生效）--><meta property="article:published_time" content="2026-07-08T00:00:00.000Z"><meta property="article:author" content="iDao技术魔方"><!--Twitter / X Card：summary_large_image = 大图卡片，点击率更高 --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@idaocube"><meta name="twitter:creator" content="@idaocube"><meta name="twitter:title" content="OpenMontage 架构深潜：当一个 LLM Agent 成为控制平面，代码该长什么样？ — iDao技术魔方"><meta name="twitter:description" content="跳过营销话术，我们钻进 OpenMontage 的 tools/、schemas/ 与 checkpoint 系统，看它如何用 YAML + Markdown 替代传统编排器，以及这套'技能即智能'的设计在工程上是否站得住脚。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="twitter:image" content="https://idao.fun/og-default.jpg"><meta name="twitter:image:alt" content="OpenMontage 架构深潜：当一个 LLM Agent 成为控制平面，代码该长什么样？ — iDao技术魔方"><meta name="baidu-site-verification" content="codeva-sdSzhlWkj2"><!-- JSON-LD 结构化数据：支持单个对象或数组，多 Schema 场景均兼容 /   GEO：结构化数据是大模型识别实体的最高优先级信号 --><script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://idao.fun/blog/2026-07-08-openmontage-architecture-deep-dive","headline":"OpenMontage 架构深潜：当一个 LLM Agent 成为控制平面，代码该长什么样？","description":"跳过营销话术，我们钻进 OpenMontage 的 tools/、schemas/ 与 checkpoint 系统，看它如何用 YAML + Markdown 替代传统编排器，以及这套'技能即智能'的设计在工程上是否站得住脚。","url":"https://idao.fun/blog/2026-07-08-openmontage-architecture-deep-dive","image":"https://idao.fun/og-default.jpg","inLanguage":"zh-CN","datePublished":"2026-07-08T00:00:00.000Z","dateModified":"2026-07-08T00:00:00.000Z","author":{"@id":"https://idao.fun/#person","name":"iDao"},"publisher":{"@id":"https://idao.fun/#person","name":"iDao技术魔方"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://idao.fun/blog/2026-07-08-openmontage-architecture-deep-dive"},"isPartOf":{"@id":"https://idao.fun/#website"},"keywords":"AI 应用, 开源, AI Agent, OpenMontage, 视频制作, 系统设计"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun/"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"AI基础设施","item":"https://idao.fun/blog/category/AI基础设施"},{"@type":"ListItem","position":4,"name":"OpenMontage 架构深潜：当一个 LLM Agent 成为控制平面，代码该长什么样？","item":"https://idao.fun/blog/2026-07-08-openmontage-architecture-deep-dive"}]}</script><script type="module">if(window.location.host==="idao.fun"){const t=window;t._hmt=t._hmt||[],(function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?15119693b771cc9cecf522df17636f96";var c=document.getElementsByTagName("script")[0];c.parentNode?.insertBefore(e,c)})()}</script><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-5R9SGFG1Z8"></script><script type="module">if(window.location.host==="idao.fun"){let t=function(...n){a.dataLayer.push(n)};const a=window;a.dataLayer=a.dataLayer||[],t("js",new Date),t("config","G-5R9SGFG1Z8")}</script><link rel="stylesheet" href="/_astro/seoHelpers.M1mEo6Z0.css"></head> <body class="min-h-screen bg-white font-sans text-primary antialiased dark:bg-[#0a0a0a] dark:text-[#ededed]"> <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-border dark:bg-[#0a0a0a]/80 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <nav class="mx-auto flex h-16 max-w-5xl items-center justify-between px-4"> <!-- Logo --> <a href="/" class="flex items-center gap-2 text-lg font-semibold tracking-[-0.02em] text-primary dark:text-[#ededed]"> <!-- <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white">i</span> --> <div class="h-6 w-6 bg-white rounded-lg flex items-center justify-center"> <img src="/favicon.svg" alt="iDao技术魔方" class="h-6 w-6"> </div> <span class="hidden sm:inline">iDao技术魔方</span> </a> <!-- PC Nav: hidden on mobile, flex on md+ --> <div class="hidden md:flex items-center gap-1"> <a href="/" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="relative px-3 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="absolute bottom-0 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-primary dark:bg-[#ededed]"></span> </a><a href="/utils" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <button id="theme-toggle" class="ml-2 flex items-center gap-1.5 rounded-md px-2 py-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式" title="切换暗色模式"> <svg class="block h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden text-sm">暗色</span> <span class="hidden dark:inline text-sm">亮色</span> </button> </div> <!-- Mobile Hamburger: hidden on md+ --> <button id="mobile-menu-toggle" class="md:hidden rounded-md p-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="打开导航菜单" title="打开导航菜单"> <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path> </svg> </button> </nav> <!-- Mobile Menu: hidden by default, toggled via JS --> <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 dark:border-[#1a1a1a] bg-white/80 backdrop-blur-md dark:bg-[#0a0a0a]/80"> <div class="mx-auto max-w-5xl flex flex-col px-4 py-3 gap-1"> <a href="/" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="ml-2 h-0.5 w-5 _inline-block rounded-full bg-primary dark:bg-[#ededed] hidden sm:inline-block"></span> </a><a href="/utils" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <!-- Mobile Theme Toggle --> <button id="mobile-theme-toggle" class="mt-2 flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式"> <svg class="block h-4 w-4 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-4 w-4 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden">切换到暗色模式</span> <span class="hidden dark:inline">切换到亮色模式</span> </button> </div> </div> </header> <script type="module">function o(e){const l=document.getElementById(e);l&&l.addEventListener("click",()=>{const i=document.documentElement.classList.toggle("dark");localStorage.setItem("theme",i?"dark":"light"),l.setAttribute("aria-label",i?"切换到亮色模式":"切换暗色模式")})}o("theme-toggle");o("mobile-theme-toggle");const n=document.getElementById("mobile-menu-toggle"),t=document.getElementById("mobile-menu");n?.addEventListener("click",()=>{t?.classList.toggle("hidden");const e=!t?.classList.contains("hidden");n.setAttribute("aria-label",e?"关闭导航菜单":"打开导航菜单")});t?.querySelectorAll("a").forEach(e=>{e.addEventListener("click",()=>{t?.classList.add("hidden"),n?.setAttribute("aria-label","打开导航菜单")})});</script> <main class="mx-auto max-w-5xl px-4 py-8">  <article class="prose mx-auto max-w-3xl dark:prose-invert"> <a href="/blog" class="text-sm text-[#666] dark:text-[#a3a3a3] no-underline">← 返回博客</a> <nav aria-label="面包屑导航" class="mb-6"> <ol class="flex flex-wrap items-center gap-1 text-sm text-[#666] dark:text-[#a3a3a3] px-0"> <li class="flex items-center gap-1">  <a href="https://idao.fun" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">首页</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">博客</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog/category/AI基础设施" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">AI基础设施</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <span class="text-primary dark:text-[#ededed] hidden sm:inline" aria-current="page">OpenMontage 架构深潜：当一个 LLM Agent 成为控制平面，代码该长什么样？</span> </li> </ol> </nav> <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"AI基础设施","item":"https://idao.fun/blog/category/AI基础设施"},{"@type":"ListItem","position":4,"name":"OpenMontage 架构深潜：当一个 LLM Agent 成为控制平面，代码该长什么样？","item":""}]}</script>  <header class="not-prose mb-8"> <h1 class="text-3xl font-bold tracking-[-0.02em] text-primary dark:text-[#ededed]">OpenMontage 架构深潜：当一个 LLM Agent 成为控制平面，代码该长什么样？</h1> <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-[#666] dark:text-[#a3a3a3]"> <time datetime="2026-07-08T00:00:00.000Z"> 2026年7月8日 </time>  <a href="/blog/category/AI基础设施" class="rounded-md bg-[#fafafa] px-2.5 py-1 text-[#4d4d4d] transition hover:bg-gray-100 dark:bg-[#262626] dark:text-[#a3a3a3] dark:hover:bg-[#333]"> AI基础设施 </a> </div> <div class="mt-3 flex flex-wrap gap-2"> <a href="/blog/tag/AI 应用" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#AI 应用 </a><a href="/blog/tag/开源" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#开源 </a><a href="/blog/tag/AI Agent" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#AI Agent </a><a href="/blog/tag/OpenMontage" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#OpenMontage </a><a href="/blog/tag/视频制作" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#视频制作 </a><a href="/blog/tag/系统设计" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#系统设计 </a> </div> </header>  <p>上一篇我们聊了 OpenMontage「是什么」——把 AI 编程助手变成视频工作室，12 条管线、52 个工具、上百个 agent skill。那篇偏产品视角。</p>
+<p>这一篇我们往下钻一层，聊它「怎么做到的」。</p>
+<p>我真正感兴趣的不是它能出什么片子，而是它选择了一条在工程界很少见的设计路线：<strong>没有任何运行时的 Python 编排器</strong>。你的 Claude Code / Cursor / Copilot 本身就是控制平面，Python 只负责提供工具和落盘。这意味着「调度逻辑」「创意决策」「审查标准」全部活在 Markdown 和 YAML 里，而不是代码里。</p>
+<p>这听起来像 Architecture Astronaut 的呓语，但钻进 <code>tools/</code> 和 <code>schemas/</code> 之后，我发现它有一套相当自洽的工程约束把这件事撑住了。下面拆开看。</p>
+<hr>
+<h2 id="一basetool所有能力的统一契约">一、BaseTool：所有能力的统一契约</h2>
+<p>OpenMontage 里每一个能力都是一个继承自 <code>BaseTool</code> 抽象基类的 Python 类。命名约定很克制——<code>PascalCase</code> 且无 <code>Tool</code> 后缀：<code>MusicGen</code>、<code>VideoCompose</code>、<code>ElevenLabsTTS</code>、<code>Transcriber</code>。</p>
+<p>调用方式统一为 <code>.execute(params_dict)</code>，返回 <code>ToolResult</code>（<code>success</code> / <code>data</code> / <code>error</code>），没有 <code>.run()</code>。这个统一入口是后面「选择器模式」和「注册表自动发现」能成立的前提。</p>
+<p>但真正有意思的是每个工具<strong>声明式地描述自己</strong>：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#C678DD">class</span><span style="color:#E5C07B"> ElevenLabsTTS</span><span style="color:#ABB2BF">(</span><span style="color:#E5C07B">BaseTool</span><span style="color:#ABB2BF">):</span></span>
+<span class="line"><span style="color:#ABB2BF">    name </span><span style="color:#56B6C2">=</span><span style="color:#98C379"> "elevenlabs_tts"</span></span>
+<span class="line"><span style="color:#ABB2BF">    version </span><span style="color:#56B6C2">=</span><span style="color:#98C379"> "1.0.0"</span></span>
+<span class="line"><span style="color:#ABB2BF">    tier </span><span style="color:#56B6C2">=</span><span style="color:#98C379"> "VOICE"</span><span style="color:#7F848E;font-style:italic">                    # CORE/VOICE/ENHANCE/GENERATE/SOURCE/ANALYZE/PUBLISH</span></span>
+<span class="line"><span style="color:#ABB2BF">    capability </span><span style="color:#56B6C2">=</span><span style="color:#98C379"> "tts"</span><span style="color:#7F848E;font-style:italic">               # 能力族，选择器靠这个路由</span></span>
+<span class="line"><span style="color:#ABB2BF">    provider </span><span style="color:#56B6C2">=</span><span style="color:#98C379"> "elevenlabs"</span><span style="color:#7F848E;font-style:italic">          # 具体后端</span></span>
+<span class="line"><span style="color:#ABB2BF">    runtime </span><span style="color:#56B6C2">=</span><span style="color:#98C379"> "API"</span><span style="color:#7F848E;font-style:italic">                  # LOCAL / LOCAL_GPU / API / HYBRID</span></span>
+<span class="line"><span style="color:#ABB2BF">    stability </span><span style="color:#56B6C2">=</span><span style="color:#98C379"> "PRODUCTION"</span><span style="color:#7F848E;font-style:italic">         # EXPERIMENTAL / BETA / PRODUCTION</span></span>
+<span class="line"><span style="color:#ABB2BF">    dependencies </span><span style="color:#56B6C2">=</span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#98C379">        "env"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"ELEVENLABS_API_KEY"</span><span style="color:#ABB2BF">],</span></span>
+<span class="line"><span style="color:#98C379">        "cmd"</span><span style="color:#ABB2BF">: [],                    </span><span style="color:#7F848E;font-style:italic"># 需要的二进制，如 ffmpeg</span></span>
+<span class="line"><span style="color:#98C379">        "python"</span><span style="color:#ABB2BF">: [],                 </span><span style="color:#7F848E;font-style:italic"># 需要的 pip 包</span></span>
+<span class="line"><span style="color:#ABB2BF">    }</span></span>
+<span class="line"><span style="color:#ABB2BF">    fallback_tools </span><span style="color:#56B6C2">=</span><span style="color:#ABB2BF"> [</span><span style="color:#98C379">"google_tts"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"openai_tts"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"piper_tts"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">    agent_skills </span><span style="color:#56B6C2">=</span><span style="color:#ABB2BF"> [</span><span style="color:#98C379">".agents/skills/elevenlabs/..."</span><span style="color:#ABB2BF">]  </span><span style="color:#7F848E;font-style:italic"># 指向 Layer 3 知识</span></span>
+<span class="line"><span style="color:#ABB2BF">    resource_profile </span><span style="color:#56B6C2">=</span><span style="color:#ABB2BF"> {</span><span style="color:#98C379">"vram"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">0</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"network"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"required"</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">...</span><span style="color:#ABB2BF">}</span></span>
+<span class="line"><span style="color:#ABB2BF">    retry_policy </span><span style="color:#56B6C2">=</span><span style="color:#ABB2BF"> {</span><span style="color:#98C379">"max_retries"</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">3</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"backoff"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"exponential"</span><span style="color:#ABB2BF">}</span></span></code></pre>
+<p>注意这几个字段的分工：</p>
+<ul>
+<li><code>capability</code> + <code>provider</code> 让一个「能力」可以有多个「实现」。TTS 这个 capability 下挂着 ElevenLabs、Google、OpenAI、Piper 四个 provider。</li>
+<li><code>runtime</code> 区分云端 API 和本地 GPU/CPU。这是 OpenMontage「免费本地 + 付费云端」双轨支持的物理基础。</li>
+<li><code>dependencies</code> 不是文档，是<strong>可执行的运行时探针</strong>——注册表靠它判断「这个工具现在能不能用」。</li>
+<li><code>fallback_tools</code> 是一串有序降级链。API key 没配？自动掉到下一个。</li>
+<li><code>agent_skills</code> 把「使用手册」嵌进调用链——agent 读到这个工具，必须先读对应 skill 再执行。</li>
+</ul>
+<p>这套声明式元数据的价值在于：它把「这个工具存在吗、能不能跑、跑挂了怎么办、怎么用才对」全部变成了<strong>可枚举、可查询、可序列化成 JSON</strong> 的数据，而不是散落在代码逻辑里的隐式约定。</p>
+<hr>
+<h2 id="二toolregistry自动发现--能力信封">二、ToolRegistry：自动发现 + 能力信封</h2>
+<p>有了统一的 <code>BaseTool</code> 契约，注册表就不需要手动注册了。<code>ToolRegistry</code> 是个单例，通过 <code>pkgutil.walk_packages()</code> 自动扫描所有 <code>BaseTool</code> 子类。</p>
+<p>这解决了 agentic 系统里一个很实际的问题：agent 在动手前必须<strong>精确知道当前机器上到底有哪些能力可用</strong>。硬编码工具列表会立刻腐烂——你加一个本地模型，列表没更新，agent 就不知道它能用。</p>
+<p>注册表提供的关键查询：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#ABB2BF">registry.</span><span style="color:#61AFEF">get_by_capability</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"tts"</span><span style="color:#ABB2BF">)      </span><span style="color:#7F848E;font-style:italic"># 所有 TTS 工具</span></span>
+<span class="line"><span style="color:#ABB2BF">registry.</span><span style="color:#61AFEF">get_by_provider</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"elevenlabs"</span><span style="color:#ABB2BF">) </span><span style="color:#7F848E;font-style:italic"># 所有 ElevenLabs 工具</span></span>
+<span class="line"><span style="color:#ABB2BF">registry.</span><span style="color:#61AFEF">get_available</span><span style="color:#ABB2BF">()               </span><span style="color:#7F848E;font-style:italic"># 依赖已满足的工具</span></span>
+<span class="line"><span style="color:#ABB2BF">registry.</span><span style="color:#61AFEF">find_fallback</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"elevenlabs_tts"</span><span style="color:#ABB2BF">)  </span><span style="color:#7F848E;font-style:italic"># 解析降级链</span></span>
+<span class="line"><span style="color:#ABB2BF">registry.</span><span style="color:#61AFEF">support_envelope</span><span style="color:#ABB2BF">()            </span><span style="color:#7F848E;font-style:italic"># 完整能力报告（agent 消费）</span></span>
+<span class="line"><span style="color:#ABB2BF">registry.</span><span style="color:#61AFEF">gpu_required_tools</span><span style="color:#ABB2BF">()          </span><span style="color:#7F848E;font-style:italic"># 需要显卡的工具</span></span>
+<span class="line"><span style="color:#ABB2BF">registry.</span><span style="color:#61AFEF">network_required_tools</span><span style="color:#ABB2BF">()      </span><span style="color:#7F848E;font-style:italic"># 需要网络的工具</span></span></code></pre>
+<p><code>provider_menu_summary()</code> 是给人类看的精简版，返回每个能力族的 <code>configured / total</code> 比例。agent 在 preflight 阶段会把这个翻译成人话：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>YOUR CAPABILITIES</span></span>
+<span class="line"><span>  Video Generation:  0/13 configured</span></span>
+<span class="line"><span>  Image Generation:  1/7 configured</span></span>
+<span class="line"><span>  Text-to-Speech:    1/3 configured</span></span>
+<span class="line"><span>  Composition:       3/3 configured (FFmpeg, video_stitch, video_trimmer)</span></span></code></pre>
+<p>「X of Y configured」这个比值设计得很巧——它让「能力广度」对用户可见，而且天然引导出「再配一个 env var 就解锁 3 个 provider」的升级路径。</p>
+<p><code>capability_catalog()</code> 和 <code>provider_catalog()</code> 则分别按能力族和按厂商分组，agent 在做路由决策时直接查，而不是靠记忆或旧文档。AGENT_GUIDE 里反复强调：<strong>Do not maintain hardcoded tool lists. Always query the registry at runtime.</strong></p>
+<hr>
+<h2 id="三选择器模式把多-provider-抽象成一刀">三、选择器模式：把多 provider 抽象成一刀</h2>
+<p>如果每次调用 TTS 都要 agent 自己写一串「先试 ElevenLabs，失败试 Google，再失败试 Piper」的逻辑，代码会灾难。OpenMontage 用三个 selector 工具把这件事收口：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Selector</th><th>路由能力</th><th>发现机制</th></tr></thead><tbody><tr><td><code>tts_selector</code></td><td>文本转语音</td><td><code>registry.get_by_capability("tts")</code></td></tr><tr><td><code>image_selector</code></td><td>图像生成</td><td><code>registry.get_by_capability("image_generation")</code></td></tr><tr><td><code>video_selector</code></td><td>视频生成</td><td><code>registry.get_by_capability("video_generation")</code></td></tr></tbody></table>
+<p>选择器从注册表<strong>动态发现</strong>可用 provider，没有任何硬编码的 provider 顺序。路由优先级是：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>用户显式指定 > 可用性 > 评分排序</span></span></code></pre>
+<p>评分维度包括任务契合度、质量、控制力、可靠性、成本、延迟、连续性。而且它会<strong>透明地在不同 provider 之间适配输入 schema</strong>——你不用关心 ElevenLabs 要 <code>voice_id</code> 而 Piper 要 <code>speaker</code>，选择器帮你翻译。</p>
+<p>这个模式最优雅的地方在于：<strong>新增一个 provider 工具，它自动对选择器可见，选择器代码一行都不用改。</strong> 能力扩展是「加一个文件」而不是「改一堆路由逻辑」。这正是 OpenMontage 能堆到 13 个视频 provider、7 个图像 provider 还不失控的原因。</p>
+<hr>
+<h2 id="四管线即-yaml导演即-markdown">四、管线即 YAML，导演即 Markdown</h2>
+<p>每条管线是 <code>pipeline_defs/</code> 下的一个 YAML 清单。它声明的是<strong>流程</strong>而非实现：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#E06C75">stages</span><span style="color:#ABB2BF">:</span></span>
+<span class="line"><span style="color:#ABB2BF">  - </span><span style="color:#E06C75">skill</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">skills/pipelines/animated-explainer/idea-director.md</span></span>
+<span class="line"><span style="color:#E06C75">    produces</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">brief</span></span>
+<span class="line"><span style="color:#E06C75">    tools_available</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">web_researcher</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">...</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#E06C75">    review_focus</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">hook_clarity</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">target_platform</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#E06C75">    success_criteria</span><span style="color:#ABB2BF">: [</span><span style="color:#D19A66">...</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#E06C75">    human_approval_default</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span></span>
+<span class="line"><span style="color:#ABB2BF">  - </span><span style="color:#E06C75">skill</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">skills/pipelines/animated-explainer/script-director.md</span></span>
+<span class="line"><span style="color:#E06C75">    produces</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">script</span></span>
+<span class="line"><span style="color:#D19A66">    ...</span></span></code></pre>
+<p>每个 stage 有几个关键属性：</p>
+<ul>
+<li><code>skill</code> —— 指向一个「导演技能」Markdown 文件，教 agent <strong>怎么</strong>干这步</li>
+<li><code>produces</code> —— 这一步产出的<strong>规范产物</strong>（canonical artifact）</li>
+<li><code>tools_available</code> —— 这一步能用哪些工具</li>
+<li><code>review_focus</code> —— 自我审查时盯什么</li>
+<li><code>success_criteria</code> —— 什么叫「这步做完了」</li>
+<li><code>human_approval_default</code> —— <strong>是否要人工审批</strong>（这个值具有约束力）</li>
+</ul>
+<p>注意 <code>produces</code>。这是整个系统的关节。每个 stage 产出<strong>一个</strong>结构化 JSON 产物，成为下一步的输入契约。而且每个产物都要过 <code>schemas/artifacts/</code> 下的 JSON Schema 校验才能写 checkpoint。</p>
+<p>这等于把「流水线数据流」做了强类型约束——只不过类型系统不是 TypeScript，是 JSON Schema。垃圾产物在写入 checkpoint 之前就会被拦下来，不会 propagate 到下游。</p>
+<p>stage 的标准顺序：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>research → proposal → script → scene_plan → assets → edit → compose</span></span></code></pre>
+<p>agent 在每个 stage 的实际动作循环是：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>读管线清单 → checkpoint.get_next_stage() 找续跑点 →</span></span>
+<span class="line"><span>读导演技能 → 用工具 → 用 reviewer 元技能自查 →</span></span>
+<span class="line"><span>写 checkpoint → 需要审批则停下等人</span></span></code></pre>
+<hr>
+<h2 id="五checkpoint状态落盘与断点续跑">五、Checkpoint：状态落盘与断点续跑</h2>
+<p>传统编排器把状态存在内存或数据库里。OpenMontage 把状态写成项目目录下的 JSON 文件：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>projects/&#x3C;project-id>/</span></span>
+<span class="line"><span>├── artifacts/      # 每个 stage 的规范产物</span></span>
+<span class="line"><span>├── assets/         # images/ video/ audio/ music/ subtitles.srt</span></span>
+<span class="line"><span>├── renders/        # final.mp4 —— 最终交付物</span></span>
+<span class="line"><span>└── checkpoint_&#x3C;stage>.json</span></span></code></pre>
+<p><code>lib/checkpoint.py</code> 提供 <code>write_checkpoint</code> / <code>read_checkpoint</code> / <code>get_next_stage</code> / <code>get_completed_stages</code> 等函数。状态值只有四种：<code>completed</code> / <code>failed</code> / <code>awaiting_human</code> / <code>in_progress</code>。</p>
+<p>这套设计解决了 agentic 工作流里最痛的一个问题：<strong>长流程中途挂了怎么办</strong>。</p>
+<p>因为每一步的产物和状态都落盘了，任何 stage 失败，下次重启直接从最后一个 checkpoint 续跑，已经完成的 stage 不用重来。而且 superseded 的 checkpoint 会自动归档到 <code>history/</code>，stage 重跑不会摧毁运行历史——这给「调试一次失败的生产」留了完整的审计轨迹。</p>
+<p>人工审批门是硬约束。<code>human_approval_default: true</code> 的 stage，如果没拿到 <code>human_approved=True</code>，写 checkpoint 会直接抛 <code>GATE VIOLATION</code>。agent 不能在同一个回复里绕过闸门继续往下干——这是防「agent 自说自话把整条片子都渲染了」的保险丝。</p>
+<hr>
+<h2 id="六预算治理把成本变成一等公民">六、预算治理：把成本变成一等公民</h2>
+<p>AI 视频最大的隐性成本不是 API 账单，是「你花一小时调 prompt，生成的东西用不上」。OpenMontage 把预算做成了<strong>一等概念</strong>：</p>
+<ul>
+<li><strong>执行前预估</strong>：提交任何付费生成前，先告诉你大概花多少</li>
+<li><strong>预算预留</strong>：行动前先 reserve 一笔</li>
+<li><strong>对账</strong>：执行后 reconciliation，agent 不能偷偷超支</li>
+<li><strong>阈值拦截</strong>：单行动作超过阈值（默认 $0.50）要你点头，总预算上限（默认 $10）封顶</li>
+</ul>
+<p>决策日志（decision_log）是 append-only 的审计轨——不是草稿本。如果中途换了 provider、换了声音、fallback 覆盖了原选择，必须<strong>追加一条新记录</strong>（用相同的 <code>category</code> 和 <code>subject</code>），把被覆盖的选项挪进 <code>options_considered</code> 并标注 <code>rejected_because</code>。直接改旧记录是缺陷：看板会继续显示过期选择。</p>
+<p>这个设计哲学很清晰：agent 的每一个「花你钱」和「改你片子」的决定，都必须可被追溯、可被质询。</p>
+<hr>
+<h2 id="七三层知识架构为什么智能在-skill-里">七、三层知识架构：为什么智能在 skill 里</h2>
+<p>OpenMontage 反复强调一句话：<strong>The intelligence is in the skills, not in improvised code.</strong></p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Layer 1: tools/ + pipeline_defs/   → 有什么、怎么编排（可执行能力 + 流程定义）</span></span>
+<span class="line"><span>Layer 2: skills/                    → OpenMontage 期望你怎么用（创意技法、质量清单、产物映射）</span></span>
+<span class="line"><span>Layer 3: .agents/skills/            → 底层技术怎么工作（FFmpeg/GSAP/HyperFrames 的厂商知识）</span></span></code></pre>
+<p>Layer 3 不是可选的。每个生成类工具（video/image/tts/music）的 <code>agent_skills</code> 字段都链着对应的 Layer 3 skill——里面是 provider 特定的 prompt 工程、参数调优、质量技巧。agent 必须在调用工具<strong>之前</strong>读这些文件。</p>
+<p>README 里有一句很直白的话：用不用 skill，区别是「能用的」和「电影级的」。通用 prompt 和 skill-informed prompt 的差距，就是垃圾和成片之间的差距。</p>
+<p>这套设计的工程含义是：<strong>agent 的行为可以通过改文本文件来调，而不是改代码。</strong> 想要更好的转场审美？改 <code>skills/meta/bespoke-composition.md</code>。想要更强的脚本结构？改 <code>script-director.md</code>。无需发版、无需重启。</p>
+<p>代价也在这：系统质量的上限，取决于这些 skill 文件写得多好。400+ 个 skill 文件是一笔巨大的、持续的内容债务——也是 OpenMontage 真正的护城河。</p>
+<hr>
+<h2 id="八两个渲染引擎与-atelier-模式">八、两个渲染引擎与 Atelier 模式</h2>
+<p>合成层（<code>video_compose</code>）背后有三个渲染引擎，在提案阶段选定并锁进 <code>edit_decisions.render_runtime</code>：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>引擎</th><th>擅长</th><th>依赖</th></tr></thead><tbody><tr><td>FFmpeg</td><td>纯剪切/拼接/裁剪/字幕烧录</td><td>ffmpeg 二进制（永远可用）</td></tr><tr><td>Remotion</td><td>基于 React 的合成：图片→动画、文字卡、图表、弹簧物理转场、词级字幕</td><td>Node.js + remotion-composer</td></tr><tr><td>HyperFrames</td><td>HTML/CSS/GSAP：动态文字、产品宣传、网站转视频、SVG 角色绑定</td><td>Node ≥ 22 + npx</td></tr></tbody></table>
+<p>有个硬规则：当机器上 FFmpeg、Remotion、HyperFrames 都可用时，agent <strong>必须</strong>把两个渲染引擎都摆给用户选，不能默默选默认。即使管线 manifest 或导演技能推荐了某一个，那也只是对话的输入，不是决定。</p>
+<p>正交于「引擎」的还有<strong>创作模式</strong>：</p>
+<ul>
+<li><strong>Templated</strong>：拼装现成的场景类型（<code>text_card</code>、<code>stat_card</code>、<code>bar_chart</code>…），快、便宜、可靠——也是为什么大多数视频「看起来都一个样」</li>
+<li><strong>Atelier</strong>：从零手写合成，一次性视觉语言，不复用任何现成组件。hero 级作品（营销、发布、品牌）默认走这个</li>
+</ul>
+<p>决定规则很妙：<strong>复用引擎知识，永不复用创意组件。</strong> Atelier 模式下，现成的场景目录和组件是被冻结的「雷同外观」，禁止复用。</p>
+<hr>
+<h2 id="九这套设计站得住脚吗">九、这套设计站得住脚吗？</h2>
+<p>钻完代码，我对 OpenMontage 工程上的判断比产品层面更正面。</p>
+<p><strong>它做对的事：</strong></p>
+<ol>
+<li><strong>声明式能力元数据</strong>让「运行时能做什么」变成可查询的数据，而不是腐烂的硬编码列表。注册表自动发现是规模化的关键。</li>
+<li><strong>选择器模式</strong>把「多 provider 路由」收敛成一个动态发现的抽象，新增能力零改动。</li>
+<li><strong>规范产物 + JSON Schema 校验</strong>把流水线数据流做强类型约束，垃圾不 propagate。</li>
+<li><strong>checkpoint 落盘 + 断点续跑</strong>解决了长流程 agentic 工作最实际的痛点。</li>
+<li><strong>预算治理和 decision_log</strong> 把「花钱」和「改片子」变成可审计、可质询的事件。</li>
+</ol>
+<p><strong>我仍有保留的点：</strong></p>
+<ul>
+<li><strong>质量上限绑死在 agent 状态上。</strong> 没有运行时编排器意味着每次执行的质量取决于 agent 当天的推理水平和 prompt 质量。链式幻觉会在七八个决策步里累积。</li>
+<li><strong>skill 文件是内容债务。</strong> 400+ 个 Markdown 是护城河，也是维护噩梦。它们写得好系统才好，写得差系统就崩。</li>
+<li><strong>非技术用户门槛高。</strong> 它本质是给「能在终端里干活、读得懂 yaml 和 markdown」的开发者用的。</li>
+</ul>
+<hr>
+<h2 id="结语">结语</h2>
+<p>OpenMontage 最值得借鉴的，不是它能出什么片子，而是它回答了一个更底层的问题：<strong>当 LLM 成为控制平面，软件架构该怎么重新组织？</strong></p>
+<p>它的答案是——把「能做什么」做成声明式契约（tools），把「流程是什么」做成数据（YAML），把「怎么做好」做成可读文本（Markdown skill），把「状态」做成落盘文件（checkpoint）。代码退居幕后，只提供能力和持久化。</p>
+<p>这条路未必是终局，但它比「再写一个中央编排器」更有想象力。如果你也在设计 agentic 系统，OpenMontage 的工具契约、选择器模式和 schema 校验的产物流，值得直接抄。</p>
+<blockquote>
+<p>原创技术博客 · 开源项目架构深潜 · <a href="https://idao.fun">idao.fun</a></p>
+</blockquote>   </article>  </main> <footer class="shadow-border bg-[#fafafa] dark:bg-[#0a0a0a] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <div class="mx-auto max-w-5xl px-4 py-12"> <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">iDao技术魔方</h3> <p class="text-sm leading-relaxed text-[#4d4d4d] dark:text-[#a3a3a3]">一枚全职独立开发者，懂全栈、爱开源、专注做优质技术内容，坐标成都。原创全栈技术内容，开源项目分享。</p> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">快速链接</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/blog" class="transition hover:text-primary dark:hover:text-[#ededed]">技术博客</a></li> <li><a href="/projects" class="transition hover:text-primary dark:hover:text-[#ededed]">开源项目</a></li> <li><a href="/utils" class="transition hover:text-primary dark:hover:text-[#ededed]">工具集</a></li> <li><a href="/ai" class="transition hover:text-primary dark:hover:text-[#ededed]">AI精选</a></li> <li><a href="/service" class="transition hover:text-primary dark:hover:text-[#ededed]">技术服务</a></li> <li><a href="/about" class="transition hover:text-primary dark:hover:text-[#ededed]">关于博主</a></li> <li><a href="/links" class="transition hover:text-primary dark:hover:text-[#ededed]">友情链接</a></li> <li><a href="/sponsor" class="transition hover:text-primary dark:hover:text-[#ededed]">赞助支持</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">联系</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="https://github.com/idao-cube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">GitHub</a></li> <li><a href="https://x.com/idaocube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">Twitter</a></li> <li><a href="mailto:hi@idao.fun" class="transition hover:text-primary dark:hover:text-[#ededed]">hi@idao.fun</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">其他</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/sitemap" class="transition hover:text-primary dark:hover:text-[#ededed]">站点地图</a></li> <li><a href="/privacy" class="transition hover:text-primary dark:hover:text-[#ededed]">隐私政策</a></li> <li><a href="/terms" class="transition hover:text-primary dark:hover:text-[#ededed]">服务条款</a></li> <li><a href="/search" class="transition hover:text-primary dark:hover:text-[#ededed]">站内搜索</a></li> </ul> </div> </div> <div class="mt-8 border-t border-gray-200 pt-6 text-center text-xs text-gray-500 dark:border-[#262626]"> <p>&copy; 2026 iDao技术魔方. All rights reserved. </p> <p class="pt-2">玩转技术魔方，创造数字未来 </p> <p class="pt-2">AI 友好索引：<a href="/llms.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms.txt</a> · <a href="/llms-full.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms-full.txt</a> · <a href="/sitemap.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">sitemap.xml</a> · <a href="/urls.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">urls.txt</a> · <a href="/rss.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">RSS</a></p> </div> </div> </footer> </body></html>

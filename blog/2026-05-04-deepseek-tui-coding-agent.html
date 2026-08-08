@@ -1,0 +1,521 @@
+<!DOCTYPE html><html lang="zh-CN" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="color-scheme" content="light dark"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" href="/favicon.ico"><link rel="alternate" type="application/rss+xml" title="iDao技术魔方 RSS Feed" href="/rss.xml"><!-- Anti-FOUC: theme init runs before first paint --><script>
+      (function() {
+        var stored = localStorage.getItem('theme')
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>DeepSeek TUI：原生 Rust 打造的终端 AI 编码 Agent — iDao技术魔方</title><meta name="description" content="全面解读 DeepSeek TUI——基于 Rust 的终端原生编码 Agent，专为 DeepSeek V4 的 1M 上下文设计。单二进制分发、Ratatui UI、三模式交互、MCP 协议支持。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="keywords" content="AI应用,全栈开发实战,AI应用落地,独立开发教程,iDao技术魔方,AI 应用,AI Agent,DeepSeek,Rust,编程工具,TUI,开源,教程"><!-- 作者信息（GEO：帮助大模型识别内容创作主体）--><meta name="author" content="iDao技术魔方"><!-- 技术信息 --><meta name="generator" content="Astro v6.1.9"><!-- 主题色（移动端浏览器标题栏着色，百度/Chrome 读取）--><meta name="theme-color" content="#0f172a"><!--Robots 指令: noindex/nofollow 精细控制 + 富摘要权限开放 --><meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- Googlebot 单独声明，优先级高于 robots --><meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- 百度蜘蛛单独声明 --><meta name="baiduspider" content="index"><!-- Canonical URL:   防止重复内容被搜索引擎分散权重 --><link rel="canonical" href="https://idao.fun/blog/2026-05-04-deepseek-tui-coding-agent"><!--Open Graph（Facebook / 微信 / 百度 / 飞书等读取） --><meta property="og:type" content="article"><meta property="og:site_name" content="iDao技术魔方"><meta property="og:title" content="DeepSeek TUI：原生 Rust 打造的终端 AI 编码 Agent — iDao技术魔方"><meta property="og:description" content="全面解读 DeepSeek TUI——基于 Rust 的终端原生编码 Agent，专为 DeepSeek V4 的 1M 上下文设计。单二进制分发、Ratatui UI、三模式交互、MCP 协议支持。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta property="og:url" content="https://idao.fun/blog/2026-05-04-deepseek-tui-coding-agent"><meta property="og:locale" content="zh_CN"><!-- OG 图片：补全 alt / width / height，避免社交平台爬取失败 --><meta property="og:image" content="https://idao.fun/og-default.jpg"><meta property="og:image:alt" content="DeepSeek TUI：原生 Rust 打造的终端 AI 编码 Agent — iDao技术魔方"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/jpeg"><!-- 文章专属 OG（ogType='article' 时生效）--><meta property="article:published_time" content="2026-05-04T00:00:00.000Z"><meta property="article:author" content="iDao技术魔方"><!--Twitter / X Card：summary_large_image = 大图卡片，点击率更高 --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@idaocube"><meta name="twitter:creator" content="@idaocube"><meta name="twitter:title" content="DeepSeek TUI：原生 Rust 打造的终端 AI 编码 Agent — iDao技术魔方"><meta name="twitter:description" content="全面解读 DeepSeek TUI——基于 Rust 的终端原生编码 Agent，专为 DeepSeek V4 的 1M 上下文设计。单二进制分发、Ratatui UI、三模式交互、MCP 协议支持。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="twitter:image" content="https://idao.fun/og-default.jpg"><meta name="twitter:image:alt" content="DeepSeek TUI：原生 Rust 打造的终端 AI 编码 Agent — iDao技术魔方"><meta name="baidu-site-verification" content="codeva-sdSzhlWkj2"><!-- JSON-LD 结构化数据：支持单个对象或数组，多 Schema 场景均兼容 /   GEO：结构化数据是大模型识别实体的最高优先级信号 --><script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://idao.fun/blog/2026-05-04-deepseek-tui-coding-agent","headline":"DeepSeek TUI：原生 Rust 打造的终端 AI 编码 Agent","description":"全面解读 DeepSeek TUI——基于 Rust 的终端原生编码 Agent，专为 DeepSeek V4 的 1M 上下文设计。单二进制分发、Ratatui UI、三模式交互、MCP 协议支持。","url":"https://idao.fun/blog/2026-05-04-deepseek-tui-coding-agent","image":"https://idao.fun/og-default.jpg","inLanguage":"zh-CN","datePublished":"2026-05-04T00:00:00.000Z","dateModified":"2026-05-04T00:00:00.000Z","author":{"@id":"https://idao.fun/#person","name":"iDao"},"publisher":{"@id":"https://idao.fun/#person","name":"iDao技术魔方"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://idao.fun/blog/2026-05-04-deepseek-tui-coding-agent"},"isPartOf":{"@id":"https://idao.fun/#website"},"keywords":"AI 应用, AI Agent, DeepSeek, Rust, 编程工具, TUI, 开源, 教程"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun/"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"AI应用","item":"https://idao.fun/blog/category/AI应用"},{"@type":"ListItem","position":4,"name":"DeepSeek TUI：原生 Rust 打造的终端 AI 编码 Agent","item":"https://idao.fun/blog/2026-05-04-deepseek-tui-coding-agent"}]}</script><script type="module">if(window.location.host==="idao.fun"){const t=window;t._hmt=t._hmt||[],(function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?15119693b771cc9cecf522df17636f96";var c=document.getElementsByTagName("script")[0];c.parentNode?.insertBefore(e,c)})()}</script><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-5R9SGFG1Z8"></script><script type="module">if(window.location.host==="idao.fun"){let t=function(...n){a.dataLayer.push(n)};const a=window;a.dataLayer=a.dataLayer||[],t("js",new Date),t("config","G-5R9SGFG1Z8")}</script><link rel="stylesheet" href="/_astro/seoHelpers.M1mEo6Z0.css"></head> <body class="min-h-screen bg-white font-sans text-primary antialiased dark:bg-[#0a0a0a] dark:text-[#ededed]"> <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-border dark:bg-[#0a0a0a]/80 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <nav class="mx-auto flex h-16 max-w-5xl items-center justify-between px-4"> <!-- Logo --> <a href="/" class="flex items-center gap-2 text-lg font-semibold tracking-[-0.02em] text-primary dark:text-[#ededed]"> <!-- <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white">i</span> --> <div class="h-6 w-6 bg-white rounded-lg flex items-center justify-center"> <img src="/favicon.svg" alt="iDao技术魔方" class="h-6 w-6"> </div> <span class="hidden sm:inline">iDao技术魔方</span> </a> <!-- PC Nav: hidden on mobile, flex on md+ --> <div class="hidden md:flex items-center gap-1"> <a href="/" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="relative px-3 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="absolute bottom-0 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-primary dark:bg-[#ededed]"></span> </a><a href="/utils" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <button id="theme-toggle" class="ml-2 flex items-center gap-1.5 rounded-md px-2 py-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式" title="切换暗色模式"> <svg class="block h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden text-sm">暗色</span> <span class="hidden dark:inline text-sm">亮色</span> </button> </div> <!-- Mobile Hamburger: hidden on md+ --> <button id="mobile-menu-toggle" class="md:hidden rounded-md p-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="打开导航菜单" title="打开导航菜单"> <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path> </svg> </button> </nav> <!-- Mobile Menu: hidden by default, toggled via JS --> <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 dark:border-[#1a1a1a] bg-white/80 backdrop-blur-md dark:bg-[#0a0a0a]/80"> <div class="mx-auto max-w-5xl flex flex-col px-4 py-3 gap-1"> <a href="/" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="ml-2 h-0.5 w-5 _inline-block rounded-full bg-primary dark:bg-[#ededed] hidden sm:inline-block"></span> </a><a href="/utils" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <!-- Mobile Theme Toggle --> <button id="mobile-theme-toggle" class="mt-2 flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式"> <svg class="block h-4 w-4 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-4 w-4 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden">切换到暗色模式</span> <span class="hidden dark:inline">切换到亮色模式</span> </button> </div> </div> </header> <script type="module">function o(e){const l=document.getElementById(e);l&&l.addEventListener("click",()=>{const i=document.documentElement.classList.toggle("dark");localStorage.setItem("theme",i?"dark":"light"),l.setAttribute("aria-label",i?"切换到亮色模式":"切换暗色模式")})}o("theme-toggle");o("mobile-theme-toggle");const n=document.getElementById("mobile-menu-toggle"),t=document.getElementById("mobile-menu");n?.addEventListener("click",()=>{t?.classList.toggle("hidden");const e=!t?.classList.contains("hidden");n.setAttribute("aria-label",e?"关闭导航菜单":"打开导航菜单")});t?.querySelectorAll("a").forEach(e=>{e.addEventListener("click",()=>{t?.classList.add("hidden"),n?.setAttribute("aria-label","打开导航菜单")})});</script> <main class="mx-auto max-w-5xl px-4 py-8">  <article class="prose mx-auto max-w-3xl dark:prose-invert"> <a href="/blog" class="text-sm text-[#666] dark:text-[#a3a3a3] no-underline">← 返回博客</a> <nav aria-label="面包屑导航" class="mb-6"> <ol class="flex flex-wrap items-center gap-1 text-sm text-[#666] dark:text-[#a3a3a3] px-0"> <li class="flex items-center gap-1">  <a href="https://idao.fun" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">首页</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">博客</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog/category/AI应用" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">AI应用</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <span class="text-primary dark:text-[#ededed] hidden sm:inline" aria-current="page">DeepSeek TUI：原生 Rust 打造的终端 AI 编码 Agent</span> </li> </ol> </nav> <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"AI应用","item":"https://idao.fun/blog/category/AI应用"},{"@type":"ListItem","position":4,"name":"DeepSeek TUI：原生 Rust 打造的终端 AI 编码 Agent","item":""}]}</script>  <header class="not-prose mb-8"> <h1 class="text-3xl font-bold tracking-[-0.02em] text-primary dark:text-[#ededed]">DeepSeek TUI：原生 Rust 打造的终端 AI 编码 Agent</h1> <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-[#666] dark:text-[#a3a3a3]"> <time datetime="2026-05-04T00:00:00.000Z"> 2026年5月4日 </time>  <a href="/blog/category/AI应用" class="rounded-md bg-[#fafafa] px-2.5 py-1 text-[#4d4d4d] transition hover:bg-gray-100 dark:bg-[#262626] dark:text-[#a3a3a3] dark:hover:bg-[#333]"> AI应用 </a> </div> <div class="mt-3 flex flex-wrap gap-2"> <a href="/blog/tag/AI 应用" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#AI 应用 </a><a href="/blog/tag/AI Agent" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#AI Agent </a><a href="/blog/tag/DeepSeek" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#DeepSeek </a><a href="/blog/tag/Rust" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Rust </a><a href="/blog/tag/编程工具" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#编程工具 </a><a href="/blog/tag/TUI" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#TUI </a><a href="/blog/tag/开源" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#开源 </a><a href="/blog/tag/教程" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#教程 </a> </div> </header>  <blockquote>
+<p>项目地址：<a href="https://github.com/Hmbown/DeepSeek-TUI">github.com/Hmbown/DeepSeek-TUI</a> | 2.9K Stars | MIT 协议</p>
+<p>项目作者：Hmbown（非 DeepSeek 官方项目）</p>
+</blockquote>
+<h2 id="一deepseek-tui-是什么">一、DeepSeek TUI 是什么？</h2>
+<p><strong>DeepSeek TUI</strong> 是一个终端原生的 AI 编码 Agent，专门为 <strong>DeepSeek V4 大模型</strong> 构建。与其说它是一个聊天界面，不如说它是一个<strong>全功能的终端开发环境</strong>——内置文件操作、Shell 执行、Git 管理、LSP 诊断、MCP 协议支持等一系列开发工具。</p>
+<p>官方描述：<em>“A terminal-native coding agent built around DeepSeek V4’s 1M-token context and prefix cache.”</em></p>
+<blockquote>
+<p>核心特色：以<strong>单个 Rust 二进制文件</strong>分发，无需安装 Node.js、Python 等运行时，下载即用。</p>
+</blockquote>
+<h3 id="核心亮点速览">核心亮点速览</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>特性</th><th>说明</th></tr></thead><tbody><tr><td><strong>纯 Rust 实现</strong></td><td>单二进制分发，无需 Node.js/Python 运行时</td></tr><tr><td><strong>1M Token 上下文</strong></td><td>专为 DeepSeek V4 的超长上下文设计</td></tr><tr><td><strong>三模式交互</strong></td><td>Plan（只读）→ Agent（审批）→ YOLO（自动），渐进式授权</td></tr><tr><td><strong>Ratatui UI</strong></td><td>基于 Rust Ratatui 框架的终端界面，DeepSeek 蓝色主题</td></tr><tr><td><strong>MCP 协议支持</strong></td><td>兼容 Model Context Protocol 生态</td></tr><tr><td><strong>LSP 原生集成</strong></td><td>rust-analyzer、pyright、typescript-language-server 等</td></tr><tr><td><strong>会话管理</strong></td><td>保存/恢复、Checkpoint、工作区回滚</td></tr><tr><td><strong>技能系统</strong></td><td>SKILL.md 可发现安装，支持 GitHub 仓库安装</td></tr><tr><td><strong>超低价格</strong></td><td>缓存命中低至 $0.0036/百万 token</td></tr></tbody></table>
+<hr>
+<h2 id="二架构设计">二、架构设计</h2>
+<h3 id="21-分派器架构">2.1 分派器架构</h3>
+<p>DeepSeek TUI 采用”<strong>分派器 → TUI → 引擎 → 工具</strong>”的四层架构：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>deepseek (CLI 分派器)</span></span>
+<span class="line"><span>    └── deepseek-tui (TUI 进程)</span></span>
+<span class="line"><span>            └── 异步引擎 (Agent 循环)</span></span>
+<span class="line"><span>                    ├── LLM 流式客户端</span></span>
+<span class="line"><span>                    ├── 工具注册表</span></span>
+<span class="line"><span>                    │   ├── 文件操作</span></span>
+<span class="line"><span>                    │   ├── Shell 执行</span></span>
+<span class="line"><span>                    │   ├── Git 管理</span></span>
+<span class="line"><span>                    │   ├── MCP 客户端</span></span>
+<span class="line"><span>                    │   └── RLM 子代理</span></span>
+<span class="line"><span>                    └── 会话管理器</span></span></code></pre>
+<ul>
+<li><strong><code>deepseek</code></strong>：轻量级 CLI 分派器，负责参数解析和进程管理</li>
+<li><strong><code>deepseek-tui</code></strong>：实际的 TUI 进程，使用 Ratatui 框架渲染界面</li>
+<li><strong>引擎</strong>：异步 Agent 循环，处理用户输入 → LLM 调用 → 工具调用 → 结果返回的完整链路</li>
+<li>两个二进制文件都不可或缺</li>
+</ul>
+<h3 id="22-三种交互模式">2.2 三种交互模式</h3>
+<p>DeepSeek TUI 设计了三种递进式的交互模式，覆盖从安全分析到完全自动化的全场景：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>模式</th><th>Tab 键切换</th><th>权限</th><th>适用场景</th></tr></thead><tbody><tr><td><strong>Plan</strong></td><td>第 1 次按 Tab</td><td>只读，拒绝文件写入，Shell 执行需审批</td><td>代码分析、架构探索</td></tr><tr><td><strong>Agent</strong></td><td>第 2 次按 Tab</td><td>标准模式，工具调用逐次审批</td><td>日常开发、功能实现</td></tr><tr><td><strong>YOLO</strong></td><td>第 3 次按 Tab</td><td>自动批准所有调用</td><td>批量操作、自动化脚本</td></tr></tbody></table>
+<blockquote>
+<p>合理使用顺序：先用 Plan 分析代码结构和影响范围 → 切到 Agent 逐次执行 → 确认安全后用 YOLO 批量推进。</p>
+</blockquote>
+<hr>
+<h2 id="三技术栈">三、技术栈</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>层级</th><th>技术选型</th></tr></thead><tbody><tr><td><strong>核心语言</strong></td><td>Rust（99.3%）</td></tr><tr><td><strong>UI 框架</strong></td><td>Ratatui（Rust TUI 库）</td></tr><tr><td><strong>包分发</strong></td><td>npm（<code>deepseek-tui</code>）、crates.io（<code>deepseek-tui-cli</code>）</td></tr><tr><td><strong>LLM API</strong></td><td>OpenAI-compatible Chat Completions API</td></tr><tr><td><strong>协议支持</strong></td><td>MCP（Model Context Protocol）、HTTP/SSE Runtime API</td></tr><tr><td><strong>LSP 支持</strong></td><td>rust-analyzer、pyright、typescript-language-server、gopls、clangd</td></tr><tr><td><strong>发布渠道</strong></td><td>GitHub Releases（预编译二进制）、Cargo、npm、Docker</td></tr></tbody></table>
+<hr>
+<h2 id="四快速安装">四、快速安装</h2>
+<h3 id="系统要求">系统要求</h3>
+<p>任何支持 Rust Tier-1 目标的系统：Linux x64/ARM64、macOS x64/ARM64、Windows x64</p>
+<h3 id="安装方式">安装方式</h3>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 方式一：npm（推荐）</span></span>
+<span class="line"><span style="color:#61AFEF">npm</span><span style="color:#98C379"> install</span><span style="color:#D19A66"> -g</span><span style="color:#98C379"> deepseek-tui</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 方式二：Cargo</span></span>
+<span class="line"><span style="color:#61AFEF">cargo</span><span style="color:#98C379"> install</span><span style="color:#98C379"> deepseek-tui-cli</span><span style="color:#D19A66"> --locked</span></span>
+<span class="line"><span style="color:#61AFEF">cargo</span><span style="color:#98C379"> install</span><span style="color:#98C379"> deepseek-tui</span><span style="color:#D19A66"> --locked</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 方式三：预编译二进制</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 从 GitHub Releases 下载对应平台的二进制文件</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Linux x64/ARM64、macOS x64/ARM64、Windows x64</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 方式四：Docker</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Dockerfile 已包含在仓库中</span></span></code></pre>
+<h3 id="认证配置">认证配置</h3>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 方式一（推荐）：交互式设置</span></span>
+<span class="line"><span style="color:#61AFEF">deepseek</span><span style="color:#98C379"> auth</span><span style="color:#98C379"> set</span><span style="color:#D19A66"> --provider</span><span style="color:#98C379"> deepseek</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 方式二：环境变量</span></span>
+<span class="line"><span style="color:#C678DD">export</span><span style="color:#E06C75"> DEEPSEEK_API_KEY</span><span style="color:#56B6C2">=</span><span style="color:#E06C75">your_key_here</span></span></code></pre>
+<h3 id="支持的大模型供应商">支持的大模型供应商</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>供应商</th><th>配置方式</th></tr></thead><tbody><tr><td><strong>DeepSeek</strong>（默认）</td><td><code>--provider deepseek</code></td></tr><tr><td><strong>NVIDIA NIM</strong></td><td><code>--provider nvidia</code></td></tr><tr><td><strong>Fireworks AI</strong></td><td><code>--provider fireworks</code></td></tr><tr><td><strong>SGLang</strong>（自托管）</td><td><code>--provider sglang</code> + 自定义 Base URL</td></tr></tbody></table>
+<hr>
+<h2 id="五核心特性深度解析">五、核心特性深度解析</h2>
+<h3 id="51-1m-token-超长上下文">5.1 1M Token 超长上下文</h3>
+<p>DeepSeek TUI 专为 DeepSeek V4 的 <strong>1M token 上下文窗口</strong> 设计。当上下文占满时，系统会自动执行<strong>智能压缩</strong>，而不是粗暴截断。</p>
+<p>这意味着你可以：</p>
+<ul>
+<li>把整个代码仓库加载到上下文中</li>
+<li>进行跨文件的全局重构</li>
+<li>维护长时间的多轮对话不丢失上下文</li>
+<li>缓存命中时成本极低</li>
+</ul>
+<h3 id="52-推理模式thinking-mode">5.2 推理模式（Thinking Mode）</h3>
+<p>DeepSeek TUI 支持流式显示 DeepSeek 的<strong>思维链推理过程</strong>：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>正常模式：仅显示最终回复</span></span>
+<span class="line"><span>思考模式：实时显示模型的推理过程</span></span></code></pre>
+<p>通过 <code>Shift+Tab</code> 可以在关闭 → 高 → 最大三个推理努力级别间循环切换。</p>
+<h3 id="53-原生-rlm-批处理">5.3 原生 RLM 批处理</h3>
+<p><code>rlm_query</code> 工具可以派生出 <strong>1 到 16 个并行子代理</strong>，用于批量分析任务：</p>
+<ul>
+<li>并行审查多个文件</li>
+<li>并发执行多项分析</li>
+<li>结果自动汇总合并</li>
+</ul>
+<p>这相当于内置了一个轻量级的子代理并行系统。</p>
+<h3 id="54-会话与工作区管理">5.4 会话与工作区管理</h3>
+<p>DeepSeek TUI 的会话管理能力远超一般的 AI 编码工具：</p>
+<ul>
+<li><strong>保存/恢复</strong>：随时保存会话，下次 <code>Ctrl+R</code> 恢复</li>
+<li><strong>Checkpoint</strong>：关键节点创建检查点</li>
+<li><strong>工作区回滚</strong>：通过侧边 Git 快照（pre/post-turn）实现回滚，<strong>与你的项目 Git 仓库完全独立</strong></li>
+<li><strong>Composer 暂存</strong>：<code>Ctrl+S</code> 暂存当前提示，<code>/stash list</code>、<code>/stash pop</code>、<code>/stash clear</code> 管理</li>
+</ul>
+<h3 id="55-lsp-集成">5.5 LSP 集成</h3>
+<p>DeepSeek TUI 内置了多语言 LSP 客户端，编辑文件后自动触发诊断：</p>
+<ul>
+<li>支持 rust-analyzer、pyright、typescript-language-server、gopls、clangd</li>
+<li>自动检测项目中的语言服务器</li>
+<li>工具编辑完成后立即显示诊断结果</li>
+<li>无需切换编辑器即可获得 IDE 级别的反馈</li>
+</ul>
+<h3 id="56-技能系统">5.6 技能系统</h3>
+<p>技能以 <code>SKILL.md</code> 文件形式存在，可以被自动发现：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span># 搜索路径（按优先级）</span></span>
+<span class="line"><span>1. .agents/skills/</span></span>
+<span class="line"><span>2. skills/</span></span>
+<span class="line"><span>3. ~/.deepseek/skills/</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># 从 GitHub 安装社区技能</span></span>
+<span class="line"><span>/skill install github:&#x3C;owner>/&#x3C;repo></span></span></code></pre>
+<p>技能系统与 Claude Code 的 Skills 生态类似，但更轻量。</p>
+<h3 id="57-mcp-协议支持">5.7 MCP 协议支持</h3>
+<p>兼容 Model Context Protocol，可以接入任意 MCP 服务器：</p>
+<ul>
+<li>配置文件配置 MCP 服务器</li>
+<li>底部状态栏显示 MCP 健康状态指示器</li>
+<li>支持标准 MCP 工具调用</li>
+</ul>
+<hr>
+<h2 id="六模型定价">六、模型定价</h2>
+<p>DeepSeek TUI 的目标模型是 DeepSeek V4，定价极低：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>模型</th><th>缓存命中</th><th>缓存未命中</th><th>输出</th></tr></thead><tbody><tr><td><strong>deepseek-v4-pro</strong></td><td>$0.003625</td><td>$0.435</td><td>$0.87</td></tr><tr><td><strong>deepseek-v4-flash</strong></td><td>$0.0028</td><td>$0.14</td><td>$0.28</td></tr></tbody></table>
+<blockquote>
+<p>缓存命中价格仅为 $0.0028–0.0036/百万 token——这在所有 AI 编码工具中几乎是成本最低的。</p>
+</blockquote>
+<p>Pro 版当前享受 <strong>75% 限时折扣</strong>（截至 2026-05-05 15:59 UTC）。</p>
+<hr>
+<h2 id="七键盘快捷键">七、键盘快捷键</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>快捷键</th><th>功能</th></tr></thead><tbody><tr><td><code>Tab</code></td><td>切换 Plan → Agent → YOLO 模式</td></tr><tr><td><code>Shift+Tab</code></td><td>切换推理努力级别</td></tr><tr><td><code>F1</code> / <code>Ctrl+/</code></td><td>搜索帮助覆盖</td></tr><tr><td><code>Ctrl+K</code></td><td>命令面板</td></tr><tr><td><code>Ctrl+R</code></td><td>恢复会话</td></tr><tr><td><code>Alt+R</code></td><td>搜索历史</td></tr><tr><td><code>Alt+↑</code></td><td>编辑已排队消息</td></tr><tr><td><code>Ctrl+S</code></td><td>暂存 Composer 提示</td></tr><tr><td><code>Esc</code></td><td>返回/关闭</td></tr><tr><td><code>@path</code></td><td>附加文件</td></tr></tbody></table>
+<hr>
+<h2 id="八配置与自定义">八、配置与自定义</h2>
+<h3 id="配置文件">配置文件</h3>
+<p><code>~/.deepseek/config.toml</code>，提供了完整的 <code>config.example.toml</code> 参考。</p>
+<h3 id="环境变量覆盖">环境变量覆盖</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>变量</th><th>作用</th></tr></thead><tbody><tr><td><code>DEEPSEEK_API_KEY</code></td><td>API 密钥</td></tr><tr><td><code>DEEPSEEK_BASE_URL</code></td><td>自定义 API 地址</td></tr><tr><td><code>DEEPSEEK_MODEL</code></td><td>指定模型</td></tr><tr><td><code>DEEPSEEK_PROVIDER</code></td><td>指定供应商</td></tr><tr><td><code>DEEPSEEK_PROFILE</code></td><td>指定配置 Profile</td></tr><tr><td><code>NO_ANIMATIONS=1</code></td><td>禁用动画（无障碍）</td></tr><tr><td><code>SSL_CERT_FILE</code></td><td>企业代理证书</td></tr></tbody></table>
+<h3 id="多语言支持">多语言支持</h3>
+<p>UI 语言支持自动检测，内置：<strong>简体中文、日语、葡萄牙语（巴西）</strong>，英语为回退项。</p>
+<p>通过 <code>locale</code> 配置项设置。</p>
+<h3 id="生命周期钩子">生命周期钩子</h3>
+<p>DeepSeek TUI 支持事件钩子系统，通过 <code>/hooks</code> 查看当前钩子列表。</p>
+<hr>
+<h2 id="九安全特性">九、安全特性</h2>
+<p>DeepSeek TUI 在安全方面做了细致的设计：</p>
+<ul>
+<li><strong>项目配置锁定</strong>：项目级配置不能覆盖安全敏感设置</li>
+<li><strong>SSRF 防护</strong>：<code>fetch_url</code> 工具有 SSRF 保护</li>
+<li><strong>Execpolicy</strong>：Shell 命令匹配使用 heredoc 解析</li>
+<li><strong>SSL 证书</strong>：支持 <code>SSL_CERT_FILE</code> 企业代理证书</li>
+<li><strong>键盘清理</strong>：崩溃时自动清理终端键盘状态</li>
+</ul>
+<hr>
+<h2 id="十与其他-ai-编码-agent-对比">十、与其他 AI 编码 Agent 对比</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>维度</th><th>DeepSeek TUI</th><th>OpenCode</th><th>Claude Code</th><th>Hermes Agent</th></tr></thead><tbody><tr><td><strong>语言</strong></td><td>Rust（99%）</td><td>TypeScript + Rust</td><td>TypeScript</td><td>Python</td></tr><tr><td><strong>运行时</strong></td><td>单二进制</td><td>Node.js</td><td>Node.js</td><td>Python/uv</td></tr><tr><td><strong>上下文</strong></td><td>1M token</td><td>标准</td><td>标准</td><td>标准</td></tr><tr><td><strong>价格</strong></td><td>极低（$0.003起）</td><td>由模型决定</td><td>订阅制 $20/月</td><td>由模型决定</td></tr><tr><td><strong>模式</strong></td><td>Plan/Agent/YOLO</td><td>Build/Plan</td><td>单一模式</td><td>多 Agent</td></tr><tr><td><strong>LSP</strong></td><td>✅ 内置</td><td>✅ 内置</td><td>❌</td><td>❌</td></tr><tr><td><strong>MCP</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr><tr><td><strong>Stars</strong></td><td>2.9K</td><td>153K</td><td>—</td><td>129K</td></tr><tr><td><strong>协议</strong></td><td>MIT</td><td>MIT</td><td>闭源</td><td>MIT</td></tr></tbody></table>
+<hr>
+<h2 id="十一适用场景">十一、适用场景</h2>
+<h3 id="deepseek-v4-用户">DeepSeek V4 用户</h3>
+<p>如果你正在使用或计划使用 DeepSeek V4，这是最原生的编码 Agent 选择——充分利用 1M 上下文和前缀缓存优势。</p>
+<h3 id="成本敏感型开发者">成本敏感型开发者</h3>
+<p>DeepSeek V4 的定价极低（缓存命中 $0.003/百万 token），配合 TUI 的缓存机制，可以以极低成本完成大量编码工作。</p>
+<h3 id="rust-和终端爱好者">Rust 和终端爱好者</h3>
+<p>纯 Rust 实现、单二进制分发、Ratatui 终端 UI——对于 Rust 爱好者和终端重度用户来说，DeepSeek TUI 本身就是一件值得体验的作品。</p>
+<h3 id="需要精细权限控制">需要精细权限控制</h3>
+<p>Plan（只读）→ Agent（审批）→ YOLO（自动）的三级递进模式，让用户可以针对不同场景选择合适的授权级别。</p>
+<hr>
+<h2 id="十二总结">十二、总结</h2>
+<p>DeepSeek TUI 是 AI 编码 Agent 领域一个独特的存在。它以<strong>纯 Rust 实现、单二进制分发</strong>的方式，提供了一套完整的终端开发环境。专为 DeepSeek V4 的 <strong>1M token 上下文</strong> 优化，配合极低的 API 定价，在成本和性能之间找到了很好的平衡点。</p>
+<p>三模式交互设计（Plan → Agent → YOLO）、LSP 内置集成、MCP 协议支持、技能系统……该有的能力一个不少。如果你已经是 DeepSeek 的用户，或者想探索一种更轻量、更便宜的 AI 编码方式，值得一试。</p>
+<p><strong>快速开始：</strong></p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#61AFEF">npm</span><span style="color:#98C379"> install</span><span style="color:#D19A66"> -g</span><span style="color:#98C379"> deepseek-tui</span></span>
+<span class="line"><span style="color:#61AFEF">deepseek</span><span style="color:#98C379"> auth</span><span style="color:#98C379"> set</span><span style="color:#D19A66"> --provider</span><span style="color:#98C379"> deepseek</span></span>
+<span class="line"><span style="color:#61AFEF">deepseek</span></span></code></pre>
+<blockquote>
+<p>技术栈：Rust 99% + Ratatui | 协议：MIT | 最新版本：v0.8.9（2026-05-04）</p>
+<p>官网：<a href="https://github.com/Hmbown/DeepSeek-TUI">github.com/Hmbown/DeepSeek-TUI</a></p>
+</blockquote>
+<blockquote>
+<p>原创技术博客 · 开源项目分享 · AI全栈创作社区  <a href="https://idao.fun">idao.fun</a></p>
+</blockquote>   </article>  </main> <footer class="shadow-border bg-[#fafafa] dark:bg-[#0a0a0a] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <div class="mx-auto max-w-5xl px-4 py-12"> <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">iDao技术魔方</h3> <p class="text-sm leading-relaxed text-[#4d4d4d] dark:text-[#a3a3a3]">一枚全职独立开发者，懂全栈、爱开源、专注做优质技术内容，坐标成都。原创全栈技术内容，开源项目分享。</p> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">快速链接</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/blog" class="transition hover:text-primary dark:hover:text-[#ededed]">技术博客</a></li> <li><a href="/projects" class="transition hover:text-primary dark:hover:text-[#ededed]">开源项目</a></li> <li><a href="/utils" class="transition hover:text-primary dark:hover:text-[#ededed]">工具集</a></li> <li><a href="/ai" class="transition hover:text-primary dark:hover:text-[#ededed]">AI精选</a></li> <li><a href="/service" class="transition hover:text-primary dark:hover:text-[#ededed]">技术服务</a></li> <li><a href="/about" class="transition hover:text-primary dark:hover:text-[#ededed]">关于博主</a></li> <li><a href="/links" class="transition hover:text-primary dark:hover:text-[#ededed]">友情链接</a></li> <li><a href="/sponsor" class="transition hover:text-primary dark:hover:text-[#ededed]">赞助支持</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">联系</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="https://github.com/idao-cube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">GitHub</a></li> <li><a href="https://x.com/idaocube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">Twitter</a></li> <li><a href="mailto:hi@idao.fun" class="transition hover:text-primary dark:hover:text-[#ededed]">hi@idao.fun</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">其他</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/sitemap" class="transition hover:text-primary dark:hover:text-[#ededed]">站点地图</a></li> <li><a href="/privacy" class="transition hover:text-primary dark:hover:text-[#ededed]">隐私政策</a></li> <li><a href="/terms" class="transition hover:text-primary dark:hover:text-[#ededed]">服务条款</a></li> <li><a href="/search" class="transition hover:text-primary dark:hover:text-[#ededed]">站内搜索</a></li> </ul> </div> </div> <div class="mt-8 border-t border-gray-200 pt-6 text-center text-xs text-gray-500 dark:border-[#262626]"> <p>&copy; 2026 iDao技术魔方. All rights reserved. </p> <p class="pt-2">玩转技术魔方，创造数字未来 </p> <p class="pt-2">AI 友好索引：<a href="/llms.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms.txt</a> · <a href="/llms-full.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms-full.txt</a> · <a href="/sitemap.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">sitemap.xml</a> · <a href="/urls.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">urls.txt</a> · <a href="/rss.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">RSS</a></p> </div> </div> </footer> </body></html>
