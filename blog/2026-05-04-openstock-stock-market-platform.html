@@ -1,0 +1,477 @@
+<!DOCTYPE html><html lang="zh-CN" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="color-scheme" content="light dark"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" href="/favicon.ico"><link rel="alternate" type="application/rss+xml" title="iDao技术魔方 RSS Feed" href="/rss.xml"><!-- Anti-FOUC: theme init runs before first paint --><script>
+      (function() {
+        var stored = localStorage.getItem('theme')
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>OpenStock 深度解析：开源股票市场追踪平台 — iDao技术魔方</title><meta name="description" content="全面解读 Open Dev Society 打造的开源股票追踪平台——Next.js 15 + React 19 + TypeScript，实时行情、智能监控、AI 日报，完全免费的开源替代方案。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="keywords" content="AI应用,全栈开发实战,AI应用落地,独立开发教程,iDao技术魔方,股票,开源,Next.js,TypeScript,React,金融,教程,OpenStock"><!-- 作者信息（GEO：帮助大模型识别内容创作主体）--><meta name="author" content="iDao技术魔方"><!-- 技术信息 --><meta name="generator" content="Astro v6.1.9"><!-- 主题色（移动端浏览器标题栏着色，百度/Chrome 读取）--><meta name="theme-color" content="#0f172a"><!--Robots 指令: noindex/nofollow 精细控制 + 富摘要权限开放 --><meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- Googlebot 单独声明，优先级高于 robots --><meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- 百度蜘蛛单独声明 --><meta name="baiduspider" content="index"><!-- Canonical URL:   防止重复内容被搜索引擎分散权重 --><link rel="canonical" href="https://idao.fun/blog/2026-05-04-openstock-stock-market-platform"><!--Open Graph（Facebook / 微信 / 百度 / 飞书等读取） --><meta property="og:type" content="article"><meta property="og:site_name" content="iDao技术魔方"><meta property="og:title" content="OpenStock 深度解析：开源股票市场追踪平台 — iDao技术魔方"><meta property="og:description" content="全面解读 Open Dev Society 打造的开源股票追踪平台——Next.js 15 + React 19 + TypeScript，实时行情、智能监控、AI 日报，完全免费的开源替代方案。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta property="og:url" content="https://idao.fun/blog/2026-05-04-openstock-stock-market-platform"><meta property="og:locale" content="zh_CN"><!-- OG 图片：补全 alt / width / height，避免社交平台爬取失败 --><meta property="og:image" content="https://idao.fun/og-default.jpg"><meta property="og:image:alt" content="OpenStock 深度解析：开源股票市场追踪平台 — iDao技术魔方"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/jpeg"><!-- 文章专属 OG（ogType='article' 时生效）--><meta property="article:published_time" content="2026-05-04T00:00:00.000Z"><meta property="article:author" content="iDao技术魔方"><!--Twitter / X Card：summary_large_image = 大图卡片，点击率更高 --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@idaocube"><meta name="twitter:creator" content="@idaocube"><meta name="twitter:title" content="OpenStock 深度解析：开源股票市场追踪平台 — iDao技术魔方"><meta name="twitter:description" content="全面解读 Open Dev Society 打造的开源股票追踪平台——Next.js 15 + React 19 + TypeScript，实时行情、智能监控、AI 日报，完全免费的开源替代方案。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="twitter:image" content="https://idao.fun/og-default.jpg"><meta name="twitter:image:alt" content="OpenStock 深度解析：开源股票市场追踪平台 — iDao技术魔方"><meta name="baidu-site-verification" content="codeva-sdSzhlWkj2"><!-- JSON-LD 结构化数据：支持单个对象或数组，多 Schema 场景均兼容 /   GEO：结构化数据是大模型识别实体的最高优先级信号 --><script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://idao.fun/blog/2026-05-04-openstock-stock-market-platform","headline":"OpenStock 深度解析：开源股票市场追踪平台","description":"全面解读 Open Dev Society 打造的开源股票追踪平台——Next.js 15 + React 19 + TypeScript，实时行情、智能监控、AI 日报，完全免费的开源替代方案。","url":"https://idao.fun/blog/2026-05-04-openstock-stock-market-platform","image":"https://idao.fun/og-default.jpg","inLanguage":"zh-CN","datePublished":"2026-05-04T00:00:00.000Z","dateModified":"2026-05-04T00:00:00.000Z","author":{"@id":"https://idao.fun/#person","name":"iDao"},"publisher":{"@id":"https://idao.fun/#person","name":"iDao技术魔方"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://idao.fun/blog/2026-05-04-openstock-stock-market-platform"},"isPartOf":{"@id":"https://idao.fun/#website"},"keywords":"股票, 开源, Next.js, TypeScript, React, 金融, 教程, OpenStock"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun/"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"AI应用","item":"https://idao.fun/blog/category/AI应用"},{"@type":"ListItem","position":4,"name":"OpenStock 深度解析：开源股票市场追踪平台","item":"https://idao.fun/blog/2026-05-04-openstock-stock-market-platform"}]}</script><script type="module">if(window.location.host==="idao.fun"){const t=window;t._hmt=t._hmt||[],(function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?15119693b771cc9cecf522df17636f96";var c=document.getElementsByTagName("script")[0];c.parentNode?.insertBefore(e,c)})()}</script><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-5R9SGFG1Z8"></script><script type="module">if(window.location.host==="idao.fun"){let t=function(...n){a.dataLayer.push(n)};const a=window;a.dataLayer=a.dataLayer||[],t("js",new Date),t("config","G-5R9SGFG1Z8")}</script><link rel="stylesheet" href="/_astro/seoHelpers.M1mEo6Z0.css"></head> <body class="min-h-screen bg-white font-sans text-primary antialiased dark:bg-[#0a0a0a] dark:text-[#ededed]"> <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-border dark:bg-[#0a0a0a]/80 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <nav class="mx-auto flex h-16 max-w-5xl items-center justify-between px-4"> <!-- Logo --> <a href="/" class="flex items-center gap-2 text-lg font-semibold tracking-[-0.02em] text-primary dark:text-[#ededed]"> <!-- <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white">i</span> --> <div class="h-6 w-6 bg-white rounded-lg flex items-center justify-center"> <img src="/favicon.svg" alt="iDao技术魔方" class="h-6 w-6"> </div> <span class="hidden sm:inline">iDao技术魔方</span> </a> <!-- PC Nav: hidden on mobile, flex on md+ --> <div class="hidden md:flex items-center gap-1"> <a href="/" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="relative px-3 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="absolute bottom-0 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-primary dark:bg-[#ededed]"></span> </a><a href="/utils" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <button id="theme-toggle" class="ml-2 flex items-center gap-1.5 rounded-md px-2 py-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式" title="切换暗色模式"> <svg class="block h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden text-sm">暗色</span> <span class="hidden dark:inline text-sm">亮色</span> </button> </div> <!-- Mobile Hamburger: hidden on md+ --> <button id="mobile-menu-toggle" class="md:hidden rounded-md p-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="打开导航菜单" title="打开导航菜单"> <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path> </svg> </button> </nav> <!-- Mobile Menu: hidden by default, toggled via JS --> <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 dark:border-[#1a1a1a] bg-white/80 backdrop-blur-md dark:bg-[#0a0a0a]/80"> <div class="mx-auto max-w-5xl flex flex-col px-4 py-3 gap-1"> <a href="/" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="ml-2 h-0.5 w-5 _inline-block rounded-full bg-primary dark:bg-[#ededed] hidden sm:inline-block"></span> </a><a href="/utils" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <!-- Mobile Theme Toggle --> <button id="mobile-theme-toggle" class="mt-2 flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式"> <svg class="block h-4 w-4 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-4 w-4 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden">切换到暗色模式</span> <span class="hidden dark:inline">切换到亮色模式</span> </button> </div> </div> </header> <script type="module">function o(e){const l=document.getElementById(e);l&&l.addEventListener("click",()=>{const i=document.documentElement.classList.toggle("dark");localStorage.setItem("theme",i?"dark":"light"),l.setAttribute("aria-label",i?"切换到亮色模式":"切换暗色模式")})}o("theme-toggle");o("mobile-theme-toggle");const n=document.getElementById("mobile-menu-toggle"),t=document.getElementById("mobile-menu");n?.addEventListener("click",()=>{t?.classList.toggle("hidden");const e=!t?.classList.contains("hidden");n.setAttribute("aria-label",e?"关闭导航菜单":"打开导航菜单")});t?.querySelectorAll("a").forEach(e=>{e.addEventListener("click",()=>{t?.classList.add("hidden"),n?.setAttribute("aria-label","打开导航菜单")})});</script> <main class="mx-auto max-w-5xl px-4 py-8">  <article class="prose mx-auto max-w-3xl dark:prose-invert"> <a href="/blog" class="text-sm text-[#666] dark:text-[#a3a3a3] no-underline">← 返回博客</a> <nav aria-label="面包屑导航" class="mb-6"> <ol class="flex flex-wrap items-center gap-1 text-sm text-[#666] dark:text-[#a3a3a3] px-0"> <li class="flex items-center gap-1">  <a href="https://idao.fun" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">首页</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">博客</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog/category/AI应用" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">AI应用</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <span class="text-primary dark:text-[#ededed] hidden sm:inline" aria-current="page">OpenStock 深度解析：开源股票市场追踪平台</span> </li> </ol> </nav> <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"AI应用","item":"https://idao.fun/blog/category/AI应用"},{"@type":"ListItem","position":4,"name":"OpenStock 深度解析：开源股票市场追踪平台","item":""}]}</script>  <header class="not-prose mb-8"> <h1 class="text-3xl font-bold tracking-[-0.02em] text-primary dark:text-[#ededed]">OpenStock 深度解析：开源股票市场追踪平台</h1> <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-[#666] dark:text-[#a3a3a3]"> <time datetime="2026-05-04T00:00:00.000Z"> 2026年5月4日 </time>  <a href="/blog/category/AI应用" class="rounded-md bg-[#fafafa] px-2.5 py-1 text-[#4d4d4d] transition hover:bg-gray-100 dark:bg-[#262626] dark:text-[#a3a3a3] dark:hover:bg-[#333]"> AI应用 </a> </div> <div class="mt-3 flex flex-wrap gap-2"> <a href="/blog/tag/股票" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#股票 </a><a href="/blog/tag/开源" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#开源 </a><a href="/blog/tag/Next.js" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Next.js </a><a href="/blog/tag/TypeScript" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#TypeScript </a><a href="/blog/tag/React" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#React </a><a href="/blog/tag/金融" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#金融 </a><a href="/blog/tag/教程" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#教程 </a><a href="/blog/tag/OpenStock" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#OpenStock </a> </div> </header>  <blockquote>
+<p>项目地址：<a href="https://github.com/Open-Dev-Society/OpenStock">github.com/Open-Dev-Society/OpenStock</a> | 11.2K Stars | AGPL-3.0 协议</p>
+<p>在线体验：<a href="https://openstock-ods.vercel.app">openstock-ods.vercel.app</a></p>
+</blockquote>
+<h2 id="一openstock-是什么">一、OpenStock 是什么？</h2>
+<p><strong>OpenStock</strong> 是一个开源的股票市场追踪平台，由 <strong>Open Dev Society</strong> 社区维护，定位为<strong>付费股票工具的免费开源替代品</strong>。</p>
+<p>它提供实时行情追踪、自定义监控、公司基本面分析等功能——而且完全免费。</p>
+<blockquote>
+<p>核心理念：“技术应该属于每个人。“</p>
+</blockquote>
+<h3 id="核心亮点速览">核心亮点速览</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>特性</th><th>说明</th></tr></thead><tbody><tr><td><strong>开源免费</strong></td><td>AGPL-3.0 协议，代码完全开放</td></tr><tr><td><strong>实时行情</strong></td><td>集成 Finnhub API + TradingView 图表</td></tr><tr><td><strong>智能监控</strong></td><td>自选股监控、签到提醒</td></tr><tr><td><strong>AI 日报</strong></td><td>每日邮件推送，基于 Gemini 生成摘要</td></tr><tr><td><strong>个性签到</strong></td><td>首次注册 AI 生成欢迎邮件</td></tr><tr><td><strong>市场概览</strong></td><td>热力图、报价、头条新闻</td></tr><tr><td><strong>全局搜索</strong></td><td>Cmd+K 命令面板，快速查找股票</td></tr><tr><td><strong>技术栈</strong></td><td>Next.js 15 + React 19 + TypeScript + MongoDB</td></tr></tbody></table>
+<hr>
+<h2 id="二技术栈">二、技术栈</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>层级</th><th>技术选型</th></tr></thead><tbody><tr><td><strong>框架</strong></td><td>Next.js 15（App Router）</td></tr><tr><td><strong>UI 库</strong></td><td>React 19</td></tr><tr><td><strong>语言</strong></td><td>TypeScript（91.7%）</td></tr><tr><td><strong>样式</strong></td><td>Tailwind CSS v4 + shadcn/ui + Radix UI</td></tr><tr><td><strong>图标</strong></td><td>Lucide</td></tr><tr><td><strong>数据库</strong></td><td>MongoDB + Mongoose</td></tr><tr><td><strong>认证</strong></td><td>Better Auth（邮箱/密码 + MongoDB 适配器）</td></tr><tr><td><strong>行情数据</strong></td><td>Finnhub API</td></tr><tr><td><strong>图表</strong></td><td>TradingView 嵌入式组件</td></tr><tr><td><strong>后台任务</strong></td><td>Inngest（cron + AI 推理）</td></tr><tr><td><strong>AI</strong></td><td>Google Gemini API（欢迎邮件 + 日报摘要）</td></tr><tr><td><strong>邮件</strong></td><td>Nodemailer（Gmail）</td></tr><tr><td><strong>容器</strong></td><td>Docker + docker-compose</td></tr></tbody></table>
+<hr>
+<h2 id="三核心功能">三、核心功能</h2>
+<h3 id="31-用户认证">3.1 用户认证</h3>
+<ul>
+<li>邮箱/密码注册和登录（Better Auth）</li>
+<li>受保护路由通过 Next.js 中间件实现</li>
+<li>签到页面收集用户信息：国家、投资目标、风险承受能力、偏好行业</li>
+</ul>
+<h3 id="32-全局搜索">3.2 全局搜索</h3>
+<ul>
+<li><code>Cmd+K</code> / <code>Ctrl+K</code> 唤起命令面板</li>
+<li>基于 Finnhub 的股票搜索</li>
+<li>空闲时显示热门股票推荐</li>
+<li>支持防抖查询</li>
+</ul>
+<h3 id="33-自选股监控">3.3 自选股监控</h3>
+<ul>
+<li>每个用户可以创建自选股列表</li>
+<li>数据存储在 MongoDB（每个用户每只股票唯一）</li>
+<li>支持添加和移除</li>
+</ul>
+<h3 id="34-股票详情页">3.4 股票详情页</h3>
+<p>每只股票提供完整的交易视图：</p>
+<ul>
+<li><strong>TradingView 组件</strong>：实时报价、K 线图、基线指标、技术指标</li>
+<li><strong>公司信息</strong>：公司简介、财务数据</li>
+<li><strong>情绪分析</strong>（可选）：通过 Adanos 整合 Reddit、X（Twitter）、新闻、Polymarket 的跨源情绪数据</li>
+</ul>
+<h3 id="35-市场概览">3.5 市场概览</h3>
+<ul>
+<li><strong>热力图</strong>：市场整体表现一目了然</li>
+<li><strong>实时报价</strong>：精选股票的最新价格</li>
+<li><strong>头条新闻</strong>：市场相关的 Top Stories</li>
+</ul>
+<h3 id="36-ai-邮件自动化">3.6 AI 邮件自动化</h3>
+<p>OpenStock 的两大 AI 邮件功能是它的突出亮点：</p>
+<p><strong>AI 个性化欢迎邮件</strong></p>
+<ul>
+<li>用户创建时自动触发</li>
+<li>使用 Gemini 生成个性化的欢迎介绍</li>
+<li>通过 Inngest 后台任务执行</li>
+</ul>
+<p><strong>每日新闻摘要邮件</strong></p>
+<ul>
+<li>Cron 定时：每天 UTC 12:00 执行</li>
+<li>根据用户自选股列表个性化生成</li>
+<li>同样由 Gemini + Inngest 驱动</li>
+</ul>
+<hr>
+<h2 id="四快速安装">四、快速安装</h2>
+<h3 id="前置依赖">前置依赖</h3>
+<ul>
+<li>Node.js 20+</li>
+<li>pnpm 或 npm</li>
+<li>MongoDB 连接字符串（Atlas 或本地 Docker）</li>
+<li>Finnhub API Key</li>
+<li>Gmail 账号（或其他 SMTP）</li>
+<li>可选：Google Gemini API Key</li>
+</ul>
+<h3 id="安装步骤">安装步骤</h3>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 克隆</span></span>
+<span class="line"><span style="color:#61AFEF">git</span><span style="color:#98C379"> clone</span><span style="color:#98C379"> https://github.com/Open-Dev-Society/OpenStock.git</span></span>
+<span class="line"><span style="color:#56B6C2">cd</span><span style="color:#98C379"> OpenStock</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 安装依赖</span></span>
+<span class="line"><span style="color:#61AFEF">pnpm</span><span style="color:#98C379"> install</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 配置环境变量（参考下方说明）</span></span>
+<span class="line"><span style="color:#61AFEF">cp</span><span style="color:#98C379"> .env.example</span><span style="color:#98C379"> .env</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 验证数据库连接</span></span>
+<span class="line"><span style="color:#61AFEF">pnpm</span><span style="color:#98C379"> test:db</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 启动开发服务器</span></span>
+<span class="line"><span style="color:#61AFEF">pnpm</span><span style="color:#98C379"> dev</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 启动后台任务（另一终端）</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> inngest-cli@latest</span><span style="color:#98C379"> dev</span></span></code></pre>
+<p>访问 <code>http://localhost:3000</code>。</p>
+<h3 id="docker-部署">Docker 部署</h3>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="yaml"><code><span class="line"><span style="color:#7F848E;font-style:italic"># docker-compose.yml 包含两个服务</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># - openstock（应用）</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># - mongodb（MongoDB 7 + 持久化卷）</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 启动</span></span>
+<span class="line"><span style="color:#98C379">docker compose up -d mongodb</span></span>
+<span class="line"><span style="color:#98C379">docker compose up -d --build</span></span></code></pre>
+<p>本地连接字符串：<code>mongodb://root:example@mongodb:27017/openstock?authSource=admin</code></p>
+<hr>
+<h2 id="五配置说明">五、配置说明</h2>
+<h3 id="必需环境变量">必需环境变量</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>变量</th><th>说明</th></tr></thead><tbody><tr><td><code>NODE_ENV</code></td><td>通常设为 “development”</td></tr><tr><td><code>MONGODB_URI</code></td><td>Atlas 或本地 Docker URI</td></tr><tr><td><code>BETTER_AUTH_SECRET</code></td><td>Better Auth 密钥</td></tr><tr><td><code>BETTER_AUTH_URL</code></td><td>如 <code>http://localhost:3000</code></td></tr><tr><td><code>NEXT_PUBLIC_FINNHUB_API_KEY</code></td><td>Finnhub API 密钥（公开到浏览器）</td></tr><tr><td><code>FINNHUB_BASE_URL</code></td><td><code>https://finnhub.io/api/v1</code></td></tr><tr><td><code>NODEMAILER_EMAIL</code></td><td>Gmail 地址</td></tr><tr><td><code>NODEMAILER_PASSWORD</code></td><td>Gmail 应用密码</td></tr></tbody></table>
+<h3 id="可选环境变量">可选环境变量</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>变量</th><th>用途</th></tr></thead><tbody><tr><td><code>ADANOS_API_KEY</code></td><td>市场情绪分析</td></tr><tr><td><code>GEMINI_API_KEY</code></td><td>AI 欢迎邮件生成</td></tr><tr><td><code>AI_PROVIDER</code></td><td>”gemini”（默认）、“minimax” 或 “siray”</td></tr><tr><td><code>INNGEST_SIGNING_KEY</code></td><td>Vercel 部署必需</td></tr></tbody></table>
+<hr>
+<h2 id="六项目架构">六、项目架构</h2>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>openstock/</span></span>
+<span class="line"><span>├── app/</span></span>
+<span class="line"><span>│   ├── (auth)/          # 登录/注册页面</span></span>
+<span class="line"><span>│   ├── (root)/          # 主页面 + stock/[symbol] 详情</span></span>
+<span class="line"><span>│   └── api/inngest/     # Inngest 路由处理器</span></span>
+<span class="line"><span>├── components/</span></span>
+<span class="line"><span>│   ├── ui/              # shadcn/Radix 基础组件</span></span>
+<span class="line"><span>│   ├── forms/           # 表单组件</span></span>
+<span class="line"><span>│   ├── Header.tsx       # 页面头部</span></span>
+<span class="line"><span>│   ├── Footer.tsx       # 页面底部</span></span>
+<span class="line"><span>│   ├── SearchCommand.tsx # 全局搜索（Cmd+K）</span></span>
+<span class="line"><span>│   └── WatchlistButton.tsx # 自选股按钮</span></span>
+<span class="line"><span>├── database/</span></span>
+<span class="line"><span>│   ├── models/          # Mongoose Schema</span></span>
+<span class="line"><span>│   └── mongoose.ts      # 数据库连接</span></span>
+<span class="line"><span>├── lib/</span></span>
+<span class="line"><span>│   ├── actions/         # Server Actions</span></span>
+<span class="line"><span>│   ├── better-auth/     # 认证配置</span></span>
+<span class="line"><span>│   ├── inngest/         # 后台任务 + AI Prompts</span></span>
+<span class="line"><span>│   └── nodemailer/      # 邮件发送</span></span>
+<span class="line"><span>├── scripts/             # 工具脚本</span></span>
+<span class="line"><span>└── types/               # 类型定义</span></span></code></pre>
+<hr>
+<h2 id="七数据来源与集成">七、数据来源与集成</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>服务</th><th>用途</th></tr></thead><tbody><tr><td><strong>Finnhub</strong></td><td>股票搜索、公司档案、市场新闻。免费版返回延迟数据</td></tr><tr><td><strong>TradingView</strong></td><td>嵌入式图表、热力图、报价、时间线</td></tr><tr><td><strong>Better Auth</strong></td><td>邮箱/密码认证 + MongoDB 会话管理</td></tr><tr><td><strong>Inngest</strong></td><td>用户创建事件（欢迎邮件）、每日 cron（日报邮件）</td></tr><tr><td><strong>Google Gemini</strong></td><td>AI 生成个性化内容</td></tr><tr><td><strong>Nodemailer</strong></td><td>Gmail 邮件发送（可配置其他 SMTP）</td></tr><tr><td><strong>Adanos</strong>（可选）</td><td>Reddit / X / 新闻 / Polymarket 情绪分析</td></tr></tbody></table>
+<hr>
+<h2 id="八与其他股票追踪工具对比">八、与其他股票追踪工具对比</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>维度</th><th>OpenStock</th><th>Yahoo Finance</th><th>TradingView</th><th>同花顺</th></tr></thead><tbody><tr><td><strong>开源</strong></td><td>✅ AGPL-3.0</td><td>❌ 闭源</td><td>❌ 闭源</td><td>❌ 闭源</td></tr><tr><td><strong>免费</strong></td><td>✅ 完全免费</td><td>✅ 基础免费</td><td>⚠️ 付费版</td><td>✅ 基础免费</td></tr><tr><td><strong>AI 日报</strong></td><td>✅ Gemini + 自选股个性化</td><td>❌</td><td>❌</td><td>❌</td></tr><tr><td><strong>自托管</strong></td><td>✅ 可自部署</td><td>❌</td><td>❌</td><td>❌</td></tr><tr><td><strong>隐私</strong></td><td>✅ 数据自控</td><td>❌</td><td>❌</td><td>❌</td></tr><tr><td><strong>技术栈</strong></td><td>Next.js 15 + React 19</td><td>—</td><td>—</td><td>—</td></tr><tr><td><strong>Stars</strong></td><td>11.2K</td><td>—</td><td>—</td><td>—</td></tr><tr><td><strong>协议</strong></td><td>AGPL-3.0</td><td>闭源</td><td>闭源</td><td>闭源</td></tr></tbody></table>
+<hr>
+<h2 id="九适用场景">九、适用场景</h2>
+<h3 id="个人投资者">个人投资者</h3>
+<ul>
+<li><strong>免费替代</strong>：不想为 TradingView/Yahoo Finance 付费的高级功能付费</li>
+<li><strong>自托管隐私</strong>：不想把自选股数据交给第三方平台</li>
+<li><strong>AI 辅助</strong>：通过 Gemini 日报了解市场动向</li>
+</ul>
+<h3 id="开发者">开发者</h3>
+<ul>
+<li><strong>学习参考</strong>：Next.js 15 + React 19 + shadcn/ui 的最佳实践项目</li>
+<li><strong>二次开发</strong>：基于 AGPL-3.0 协议扩展自己的金融工具</li>
+<li><strong>架构参考</strong>：Better Auth + Inngest 后台任务 + AI 集成的完整示例</li>
+</ul>
+<h3 id="开源社区">开源社区</h3>
+<ul>
+<li>11.2K Stars 的开源金融项目，社区活跃</li>
+<li>完整的 CI/CD、Docker 部署、环境变量管理</li>
+<li>欢迎贡献和 fork</li>
+</ul>
+<hr>
+<h2 id="十open-dev-society-理念">十、Open Dev Society 理念</h2>
+<p>OpenStock 背后的 <strong>Open Dev Society</strong> 遵循一套明确的宣言：</p>
+<ul>
+<li>技术和工具应面向专业人士和学生，不应设障碍</li>
+<li>知识平台应永远保持免费</li>
+<li>社区应引导而非评判初学者</li>
+<li>通过透明度、捐赠和社区力量获得资金</li>
+</ul>
+<blockquote>
+<p>“Nothing here is financial advice.” —— 项目明确声明不构成投资建议。</p>
+</blockquote>
+<hr>
+<h2 id="十一总结">十一、总结</h2>
+<p>OpenStock 是一个功能完整的开源股票追踪平台。它用现代技术栈（Next.js 15 + React 19 + TypeScript + MongoDB）实现了付费股票工具的核心功能——实时行情、自选股监控、公司分析——同时通过 Gemini AI 提供了个性化的邮件日报。</p>
+<p>对于不想依赖付费平台的个人投资者，或者想学习完整 Next.js 全栈项目的开发者来说，OpenStock 都值得关注。</p>
+<p><strong>快速开始：</strong></p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#61AFEF">git</span><span style="color:#98C379"> clone</span><span style="color:#98C379"> https://github.com/Open-Dev-Society/OpenStock.git</span></span>
+<span class="line"><span style="color:#56B6C2">cd</span><span style="color:#98C379"> OpenStock</span></span>
+<span class="line"><span style="color:#61AFEF">pnpm</span><span style="color:#98C379"> install</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 配置 .env 后</span></span>
+<span class="line"><span style="color:#61AFEF">pnpm</span><span style="color:#98C379"> dev</span></span></code></pre>
+<blockquote>
+<p>技术栈：Next.js 15 + React 19 + TypeScript 92% + MongoDB + Tailwind CSS v4 | 协议：AGPL-3.0</p>
+<p>在线体验：<a href="https://openstock-ods.vercel.app">openstock-ods.vercel.app</a></p>
+</blockquote>
+<blockquote>
+<p>原创技术博客 · 开源项目分享 · AI全栈创作社区  <a href="https://idao.fun">idao.fun</a></p>
+</blockquote>   </article>  </main> <footer class="shadow-border bg-[#fafafa] dark:bg-[#0a0a0a] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <div class="mx-auto max-w-5xl px-4 py-12"> <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">iDao技术魔方</h3> <p class="text-sm leading-relaxed text-[#4d4d4d] dark:text-[#a3a3a3]">一枚全职独立开发者，懂全栈、爱开源、专注做优质技术内容，坐标成都。原创全栈技术内容，开源项目分享。</p> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">快速链接</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/blog" class="transition hover:text-primary dark:hover:text-[#ededed]">技术博客</a></li> <li><a href="/projects" class="transition hover:text-primary dark:hover:text-[#ededed]">开源项目</a></li> <li><a href="/utils" class="transition hover:text-primary dark:hover:text-[#ededed]">工具集</a></li> <li><a href="/ai" class="transition hover:text-primary dark:hover:text-[#ededed]">AI精选</a></li> <li><a href="/service" class="transition hover:text-primary dark:hover:text-[#ededed]">技术服务</a></li> <li><a href="/about" class="transition hover:text-primary dark:hover:text-[#ededed]">关于博主</a></li> <li><a href="/links" class="transition hover:text-primary dark:hover:text-[#ededed]">友情链接</a></li> <li><a href="/sponsor" class="transition hover:text-primary dark:hover:text-[#ededed]">赞助支持</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">联系</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="https://github.com/idao-cube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">GitHub</a></li> <li><a href="https://x.com/idaocube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">Twitter</a></li> <li><a href="mailto:hi@idao.fun" class="transition hover:text-primary dark:hover:text-[#ededed]">hi@idao.fun</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">其他</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/sitemap" class="transition hover:text-primary dark:hover:text-[#ededed]">站点地图</a></li> <li><a href="/privacy" class="transition hover:text-primary dark:hover:text-[#ededed]">隐私政策</a></li> <li><a href="/terms" class="transition hover:text-primary dark:hover:text-[#ededed]">服务条款</a></li> <li><a href="/search" class="transition hover:text-primary dark:hover:text-[#ededed]">站内搜索</a></li> </ul> </div> </div> <div class="mt-8 border-t border-gray-200 pt-6 text-center text-xs text-gray-500 dark:border-[#262626]"> <p>&copy; 2026 iDao技术魔方. All rights reserved. </p> <p class="pt-2">玩转技术魔方，创造数字未来 </p> <p class="pt-2">AI 友好索引：<a href="/llms.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms.txt</a> · <a href="/llms-full.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms-full.txt</a> · <a href="/sitemap.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">sitemap.xml</a> · <a href="/urls.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">urls.txt</a> · <a href="/rss.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">RSS</a></p> </div> </div> </footer> </body></html>

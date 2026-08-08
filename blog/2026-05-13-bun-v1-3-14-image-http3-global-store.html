@@ -1,0 +1,366 @@
+<!DOCTYPE html><html lang="zh-CN" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="color-scheme" content="light dark"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" href="/favicon.ico"><link rel="alternate" type="application/rss+xml" title="iDao技术魔方 RSS Feed" href="/rss.xml"><!-- Anti-FOUC: theme init runs before first paint --><script>
+      (function() {
+        var stored = localStorage.getItem('theme')
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Bun v1.3.14 深度解析：Image API、HTTP/3、全局虚拟存储与五十项变革 — iDao技术魔方</title><meta name="description" content="Bun v1.3.14 是 Bun 历史上功能最密集的版本之一。内置 Image API、HTTP/3 服务器与客户端、全局虚拟存储、重写的 fs.watch、跨语言 LTO——解读这个 JS 运行时正在成为全能基础设施的路线图 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="keywords" content="技术深度,全栈开发实战,AI应用落地,独立开发教程,iDao技术魔方,Bun,JavaScript,Runtime,HTTP3,QUIC,Image Processing,Package Manager,Performance"><!-- 作者信息（GEO：帮助大模型识别内容创作主体）--><meta name="author" content="iDao技术魔方"><!-- 技术信息 --><meta name="generator" content="Astro v6.1.9"><!-- 主题色（移动端浏览器标题栏着色，百度/Chrome 读取）--><meta name="theme-color" content="#0f172a"><!--Robots 指令: noindex/nofollow 精细控制 + 富摘要权限开放 --><meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- Googlebot 单独声明，优先级高于 robots --><meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- 百度蜘蛛单独声明 --><meta name="baiduspider" content="index"><!-- Canonical URL:   防止重复内容被搜索引擎分散权重 --><link rel="canonical" href="https://idao.fun/blog/2026-05-13-bun-v1-3-14-image-http3-global-store"><!--Open Graph（Facebook / 微信 / 百度 / 飞书等读取） --><meta property="og:type" content="article"><meta property="og:site_name" content="iDao技术魔方"><meta property="og:title" content="Bun v1.3.14 深度解析：Image API、HTTP/3、全局虚拟存储与五十项变革 — iDao技术魔方"><meta property="og:description" content="Bun v1.3.14 是 Bun 历史上功能最密集的版本之一。内置 Image API、HTTP/3 服务器与客户端、全局虚拟存储、重写的 fs.watch、跨语言 LTO——解读这个 JS 运行时正在成为全能基础设施的路线图 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta property="og:url" content="https://idao.fun/blog/2026-05-13-bun-v1-3-14-image-http3-global-store"><meta property="og:locale" content="zh_CN"><!-- OG 图片：补全 alt / width / height，避免社交平台爬取失败 --><meta property="og:image" content="https://idao.fun/og-default.jpg"><meta property="og:image:alt" content="Bun v1.3.14 深度解析：Image API、HTTP/3、全局虚拟存储与五十项变革 — iDao技术魔方"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/jpeg"><!-- 文章专属 OG（ogType='article' 时生效）--><meta property="article:published_time" content="2026-05-13T00:00:00.000Z"><meta property="article:author" content="iDao技术魔方"><!--Twitter / X Card：summary_large_image = 大图卡片，点击率更高 --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@idaocube"><meta name="twitter:creator" content="@idaocube"><meta name="twitter:title" content="Bun v1.3.14 深度解析：Image API、HTTP/3、全局虚拟存储与五十项变革 — iDao技术魔方"><meta name="twitter:description" content="Bun v1.3.14 是 Bun 历史上功能最密集的版本之一。内置 Image API、HTTP/3 服务器与客户端、全局虚拟存储、重写的 fs.watch、跨语言 LTO——解读这个 JS 运行时正在成为全能基础设施的路线图 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="twitter:image" content="https://idao.fun/og-default.jpg"><meta name="twitter:image:alt" content="Bun v1.3.14 深度解析：Image API、HTTP/3、全局虚拟存储与五十项变革 — iDao技术魔方"><meta name="baidu-site-verification" content="codeva-sdSzhlWkj2"><!-- JSON-LD 结构化数据：支持单个对象或数组，多 Schema 场景均兼容 /   GEO：结构化数据是大模型识别实体的最高优先级信号 --><script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://idao.fun/blog/2026-05-13-bun-v1-3-14-image-http3-global-store","headline":"Bun v1.3.14 深度解析：Image API、HTTP/3、全局虚拟存储与五十项变革","description":"Bun v1.3.14 是 Bun 历史上功能最密集的版本之一。内置 Image API、HTTP/3 服务器与客户端、全局虚拟存储、重写的 fs.watch、跨语言 LTO——解读这个 JS 运行时正在成为全能基础设施的路线图","url":"https://idao.fun/blog/2026-05-13-bun-v1-3-14-image-http3-global-store","image":"https://idao.fun/og-default.jpg","inLanguage":"zh-CN","datePublished":"2026-05-13T00:00:00.000Z","dateModified":"2026-05-13T00:00:00.000Z","author":{"@id":"https://idao.fun/#person","name":"iDao"},"publisher":{"@id":"https://idao.fun/#person","name":"iDao技术魔方"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://idao.fun/blog/2026-05-13-bun-v1-3-14-image-http3-global-store"},"isPartOf":{"@id":"https://idao.fun/#website"},"keywords":"Bun, JavaScript, Runtime, HTTP3, QUIC, Image Processing, Package Manager, Performance"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun/"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"技术深度","item":"https://idao.fun/blog/category/技术深度"},{"@type":"ListItem","position":4,"name":"Bun v1.3.14 深度解析：Image API、HTTP/3、全局虚拟存储与五十项变革","item":"https://idao.fun/blog/2026-05-13-bun-v1-3-14-image-http3-global-store"}]}</script><script type="module">if(window.location.host==="idao.fun"){const t=window;t._hmt=t._hmt||[],(function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?15119693b771cc9cecf522df17636f96";var c=document.getElementsByTagName("script")[0];c.parentNode?.insertBefore(e,c)})()}</script><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-5R9SGFG1Z8"></script><script type="module">if(window.location.host==="idao.fun"){let t=function(...n){a.dataLayer.push(n)};const a=window;a.dataLayer=a.dataLayer||[],t("js",new Date),t("config","G-5R9SGFG1Z8")}</script><link rel="stylesheet" href="/_astro/seoHelpers.M1mEo6Z0.css"></head> <body class="min-h-screen bg-white font-sans text-primary antialiased dark:bg-[#0a0a0a] dark:text-[#ededed]"> <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-border dark:bg-[#0a0a0a]/80 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <nav class="mx-auto flex h-16 max-w-5xl items-center justify-between px-4"> <!-- Logo --> <a href="/" class="flex items-center gap-2 text-lg font-semibold tracking-[-0.02em] text-primary dark:text-[#ededed]"> <!-- <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white">i</span> --> <div class="h-6 w-6 bg-white rounded-lg flex items-center justify-center"> <img src="/favicon.svg" alt="iDao技术魔方" class="h-6 w-6"> </div> <span class="hidden sm:inline">iDao技术魔方</span> </a> <!-- PC Nav: hidden on mobile, flex on md+ --> <div class="hidden md:flex items-center gap-1"> <a href="/" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="relative px-3 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="absolute bottom-0 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-primary dark:bg-[#ededed]"></span> </a><a href="/utils" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <button id="theme-toggle" class="ml-2 flex items-center gap-1.5 rounded-md px-2 py-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式" title="切换暗色模式"> <svg class="block h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden text-sm">暗色</span> <span class="hidden dark:inline text-sm">亮色</span> </button> </div> <!-- Mobile Hamburger: hidden on md+ --> <button id="mobile-menu-toggle" class="md:hidden rounded-md p-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="打开导航菜单" title="打开导航菜单"> <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path> </svg> </button> </nav> <!-- Mobile Menu: hidden by default, toggled via JS --> <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 dark:border-[#1a1a1a] bg-white/80 backdrop-blur-md dark:bg-[#0a0a0a]/80"> <div class="mx-auto max-w-5xl flex flex-col px-4 py-3 gap-1"> <a href="/" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="ml-2 h-0.5 w-5 _inline-block rounded-full bg-primary dark:bg-[#ededed] hidden sm:inline-block"></span> </a><a href="/utils" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <!-- Mobile Theme Toggle --> <button id="mobile-theme-toggle" class="mt-2 flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式"> <svg class="block h-4 w-4 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-4 w-4 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden">切换到暗色模式</span> <span class="hidden dark:inline">切换到亮色模式</span> </button> </div> </div> </header> <script type="module">function o(e){const l=document.getElementById(e);l&&l.addEventListener("click",()=>{const i=document.documentElement.classList.toggle("dark");localStorage.setItem("theme",i?"dark":"light"),l.setAttribute("aria-label",i?"切换到亮色模式":"切换暗色模式")})}o("theme-toggle");o("mobile-theme-toggle");const n=document.getElementById("mobile-menu-toggle"),t=document.getElementById("mobile-menu");n?.addEventListener("click",()=>{t?.classList.toggle("hidden");const e=!t?.classList.contains("hidden");n.setAttribute("aria-label",e?"关闭导航菜单":"打开导航菜单")});t?.querySelectorAll("a").forEach(e=>{e.addEventListener("click",()=>{t?.classList.add("hidden"),n?.setAttribute("aria-label","打开导航菜单")})});</script> <main class="mx-auto max-w-5xl px-4 py-8">  <article class="prose mx-auto max-w-3xl dark:prose-invert"> <a href="/blog" class="text-sm text-[#666] dark:text-[#a3a3a3] no-underline">← 返回博客</a> <nav aria-label="面包屑导航" class="mb-6"> <ol class="flex flex-wrap items-center gap-1 text-sm text-[#666] dark:text-[#a3a3a3] px-0"> <li class="flex items-center gap-1">  <a href="https://idao.fun" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">首页</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">博客</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog/category/技术深度" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">技术深度</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <span class="text-primary dark:text-[#ededed] hidden sm:inline" aria-current="page">Bun v1.3.14 深度解析：Image API、HTTP/3、全局虚拟存储与五十项变革</span> </li> </ol> </nav> <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"技术深度","item":"https://idao.fun/blog/category/技术深度"},{"@type":"ListItem","position":4,"name":"Bun v1.3.14 深度解析：Image API、HTTP/3、全局虚拟存储与五十项变革","item":""}]}</script>  <header class="not-prose mb-8"> <h1 class="text-3xl font-bold tracking-[-0.02em] text-primary dark:text-[#ededed]">Bun v1.3.14 深度解析：Image API、HTTP/3、全局虚拟存储与五十项变革</h1> <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-[#666] dark:text-[#a3a3a3]"> <time datetime="2026-05-13T00:00:00.000Z"> 2026年5月13日 </time>  <a href="/blog/category/技术深度" class="rounded-md bg-[#fafafa] px-2.5 py-1 text-[#4d4d4d] transition hover:bg-gray-100 dark:bg-[#262626] dark:text-[#a3a3a3] dark:hover:bg-[#333]"> 技术深度 </a> </div> <div class="mt-3 flex flex-wrap gap-2"> <a href="/blog/tag/Bun" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Bun </a><a href="/blog/tag/JavaScript" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#JavaScript </a><a href="/blog/tag/Runtime" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Runtime </a><a href="/blog/tag/HTTP3" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#HTTP3 </a><a href="/blog/tag/QUIC" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#QUIC </a><a href="/blog/tag/Image Processing" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Image Processing </a><a href="/blog/tag/Package Manager" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Package Manager </a><a href="/blog/tag/Performance" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Performance </a> </div> </header>  <blockquote>
+<p>Bun v1.3.14 发布于 2026 年 5 月 13 日。这是 Bun 历史上功能最密集的版本之一——50+ 项变更，涵盖内置图像处理引擎、HTTP/3 服务器与客户端、全新的全局包缓存架构。如果用一句话概括这个版本：<strong>Bun 正在把自己从一个”更快的 Node.js”变成”全能的基础设施平台”</strong>。</p>
+</blockquote>
+<hr>
+<h2 id="一bunimage不再需要-sharp">一、Bun.Image：不再需要 sharp</h2>
+<p>v1.3.14 最引人注目的新特性是 <code>Bun.Image</code>——一个完全内置的图像处理 API。在它之前，Node.js 生态做图像处理几乎绕不开 <code>sharp</code>（原生 C++ 模块，安装需要编译环境）。Bun 用 Zig 实现了纯编译时内联的图像编解码，不依赖任何原生模块。</p>
+<h3 id="支持格式">支持格式</h3>
+<p>Bun.Image 在 v1.3.14 中支持以下格式的<strong>解码</strong>：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>格式</th><th>支持</th></tr></thead><tbody><tr><td>JPEG</td><td>✅</td></tr><tr><td>PNG</td><td>✅</td></tr><tr><td>WebP</td><td>✅</td></tr><tr><td>GIF</td><td>✅ (静态)</td></tr><tr><td>BMP</td><td>✅</td></tr><tr><td>HEIC / HEIF</td><td>✅</td></tr><tr><td>AVIF</td><td>✅</td></tr><tr><td>TIFF</td><td>✅</td></tr></tbody></table>
+<p>编码输出支持 JPEG、PNG、WebP 和 AVIF。</p>
+<h3 id="处理管线">处理管线</h3>
+<p>Bun.Image 的设计是”可链式组合”的——每个操作返回一个新的 Image 实例，不会就地修改：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="typescript"><code><span class="line"><span style="color:#C678DD">import</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">Image</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">from</span><span style="color:#98C379"> "bun"</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> image</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> await</span><span style="color:#E5C07B"> Image</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">open</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"photo.heic"</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> processed</span><span style="color:#56B6C2"> =</span><span style="color:#E06C75"> image</span></span>
+<span class="line"><span style="color:#ABB2BF">  .</span><span style="color:#61AFEF">resize</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">800</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">600</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">fit</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"cover"</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"><span style="color:#ABB2BF">  .</span><span style="color:#61AFEF">rotate</span><span style="color:#ABB2BF">(</span><span style="color:#56B6C2">-</span><span style="color:#D19A66">90</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">  .</span><span style="color:#61AFEF">flip</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"horizontal"</span><span style="color:#ABB2BF">)</span></span>
+<span class="line"><span style="color:#ABB2BF">  .</span><span style="color:#61AFEF">modulate</span><span style="color:#ABB2BF">({ </span><span style="color:#E06C75">brightness</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">0.8</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">contrast</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">1.2</span><span style="color:#ABB2BF"> })</span></span>
+<span class="line"><span style="color:#ABB2BF">  .</span><span style="color:#61AFEF">crop</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">100</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">100</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">400</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">300</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 编码输出</span></span>
+<span class="line"><span style="color:#C678DD">await</span><span style="color:#E5C07B"> processed</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">save</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"output.avif"</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">quality</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">85</span><span style="color:#ABB2BF"> });</span></span>
+<span class="line"><span style="color:#C678DD">await</span><span style="color:#E5C07B"> processed</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">encode</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"jpeg"</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">quality</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">90</span><span style="color:#ABB2BF"> });  </span><span style="color:#7F848E;font-style:italic">// 返回 Buffer</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 直接响应 HTTP</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> body</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> new</span><span style="color:#61AFEF"> Response</span><span style="color:#ABB2BF">(</span><span style="color:#E5C07B">processed</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">stream</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"webp"</span><span style="color:#ABB2BF">));</span></span></code></pre>
+<h3 id="性能对比-sharp">性能对比 sharp</h3>
+<p>官方 blog 的数字：Bun.Image <strong>通常比 sharp 快 1-2 倍</strong>，在元数据读取场景尤为明显——<code>Image.metadata()</code> 比 sharp 的同类调用快 <strong>70 倍</strong>。这因为 sharp 的 metadata() 需要完整解码图像后才能解析元数据，而 Bun.Image 只在文件头部解析关键数据块就返回了结果。</p>
+<p>resize 操作（将 4K JPEG 缩放到 1920×1080）在两个库的实现上接近持平，Bun 略快 10-20%。但 Bun.Image 的初始化和内存分配开销明显更小——因为不需要在运行时加载任何动态库。</p>
+<h3 id="滤镜与兼容性">滤镜与兼容性</h3>
+<p>Bun.Image 在 resize 方法上兼容 sharp 的命名参数：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="typescript"><code><span class="line"><span style="color:#7F848E;font-style:italic">// 和 sharp 相同的 resize 参数结构</span></span>
+<span class="line"><span style="color:#E5C07B">image</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">resize</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">800</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">600</span><span style="color:#ABB2BF">, {</span></span>
+<span class="line"><span style="color:#E06C75">  fit</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"cover"</span><span style="color:#ABB2BF">,     </span><span style="color:#7F848E;font-style:italic">// cover / contain / fill / inside / outside</span></span>
+<span class="line"><span style="color:#E06C75">  position</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"center"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  background</span><span style="color:#ABB2BF">: { </span><span style="color:#E06C75">r</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">255</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">g</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">255</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">b</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">255</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">alpha</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">1</span><span style="color:#ABB2BF"> },</span></span>
+<span class="line"><span style="color:#E06C75">  withoutEnlargement</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  kernel</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"lanczos3"</span><span style="color:#ABB2BF">,  </span><span style="color:#7F848E;font-style:italic">// nearest / cubic / mitchell / lanczos2 / lanczos3</span></span>
+<span class="line"><span style="color:#ABB2BF">});</span></span></code></pre>
+<p>目前缺少的高阶特性：文本叠加、SVG 渲染、复杂路径裁剪、多页 GIF 动画。但对于 90% 的图像处理场景——缩略图生成、格式转换、质量压缩、元数据提取——Bun.Image 已经是一个不需要任何安装步骤的全能方案。</p>
+<hr>
+<h2 id="二全局虚拟存储bun-install-架构升级">二、全局虚拟存储：bun install 架构升级</h2>
+<p>Node.js 生态的包管理器在过去十年里走过了一条清晰的演化路径：从 <code>npm</code>（node_modules 树）到 <code>pnpm</code>（link store）到 <code>Yarn PnP</code>（zip 虚拟文件系统）。Bun 在 v1.3.14 中提出了自己的方案：<strong>全局虚拟存储</strong>（Global Virtual Store）。</p>
+<h3 id="原理">原理</h3>
+<p>在 <code>bun install</code> 新增的 <code>--linker=isolated</code> 模式下，如果启用 <code>globalStore=true</code>：</p>
+<ol>
+<li>所有包的物理内容只下载<strong>一次</strong>到全局缓存（<code>~/.bun/install/global/</code>）</li>
+<li>每个包的 node_modules 中只存放一个<strong>虚拟映射文件</strong>（vfs 文件）</li>
+<li>Bun 的运行时在模块加载时通过 vfs 文件直接访问全局缓存中的包内容</li>
+</ol>
+<p>这个方案的精妙之处在于：<strong>对 node_modules 的目录结构不做任何破坏性改变</strong>。不像 pnpm 用 symlink 改变了 node_modules 的物理布局，也不像 Yarn PnP 完全抛弃了 node_modules。Bun 的 node_modules 看起来和 npm 一样——只是里面的文件变成了轻量级索引。</p>
+<h3 id="性能数据">性能数据</h3>
+<p>官方测试：安装 1,400 个包（Next.js 应用），<strong>冷启动</strong>首次安装：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>方式</th><th>耗时</th><th>备注</th></tr></thead><tbody><tr><td>bun install（默认）</td><td>~6.2s</td><td>标准方式，需要大量文件拷贝</td></tr><tr><td>npm install</td><td>~42s</td><td>基准</td></tr><tr><td>pnpm install</td><td>~18s</td><td></td></tr></tbody></table>
+<p><strong>预热后</strong>（相同依赖再次安装，仅更新锁文件）：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>方式</th><th>耗时</th><th>clonefileat 调用</th></tr></thead><tbody><tr><td>bun install（默认）</td><td>~841ms</td><td>~1400</td></tr><tr><td>bun install（globalStore）</td><td><strong>~115ms</strong></td><td><strong>0</strong></td></tr></tbody></table>
+<p>全局虚拟存储的预热安装快了约 <strong>7x</strong>。clonefileat 调用降为零意味着在持续集成（CI）等场景中，磁盘 I/O 开销几乎被消除——对于高频安装依赖的 CI 流水线来说，这是实打实的时间节省。</p>
+<hr>
+<h2 id="三http3-服务器509k-reqs-的-quic">三、HTTP/3 服务器：509K req/s 的 QUIC</h2>
+<h3 id="服务器端-quic">服务器端 QUIC</h3>
+<p>Bun.serve 在 v1.3.14 中加入了<strong>高度实验性</strong>的 HTTP/3（QUIC）支持，底层使用 <code>lsquic v4.6.2</code> 库。</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="typescript"><code><span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> server</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> Bun</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">serve</span><span style="color:#ABB2BF">({</span></span>
+<span class="line"><span style="color:#E06C75">  port</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">443</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">  // 同时监听 HTTP/1.1、HTTP/2 和 HTTP/3</span></span>
+<span class="line"><span style="color:#E06C75">  tls</span><span style="color:#ABB2BF">: { </span><span style="color:#E06C75">key</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">Bun</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">file</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"key.pem"</span><span style="color:#ABB2BF">), </span><span style="color:#E06C75">cert</span><span style="color:#ABB2BF">: </span><span style="color:#E5C07B">Bun</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">file</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"cert.pem"</span><span style="color:#ABB2BF">) },</span></span>
+<span class="line"><span style="color:#E06C75">  h3</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span><span style="color:#ABB2BF">,  </span><span style="color:#7F848E;font-style:italic">// 🔥 开启 HTTP/3</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">  fetch</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75;font-style:italic">req</span><span style="color:#ABB2BF">) {</span></span>
+<span class="line"><span style="color:#C678DD">    return</span><span style="color:#C678DD"> new</span><span style="color:#61AFEF"> Response</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"Hello from HTTP/3!"</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#ABB2BF">  },</span></span>
+<span class="line"><span style="color:#ABB2BF">});</span></span></code></pre>
+<p>关键设计：<strong>同一个 fetch() 处理器同时支持 HTTP/1.1、HTTP/2 和 HTTP/3</strong>。不需要为不同协议写不同的路由逻辑。</p>
+<p>性能对比（静态路由，TLS）：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>协议</th><th>请求/秒</th></tr></thead><tbody><tr><td>HTTP/1.1 (HTTPS)</td><td>~189K</td></tr><tr><td>HTTP/2</td><td>~510K</td></tr><tr><td>HTTP/3 (QUIC)</td><td>~509K</td></tr></tbody></table>
+<p>H2 和 H3 在这个基准上几乎持平。但 QUIC 的真正优势体现在丢包、高延迟网络环境（移动网络、跨洋连接）——传统 TCP 在这种场景下的队头阻塞问题会严重降低吞吐，而 QUIC 基于 UDP 的独立流设计天然不受影响。</p>
+<p>说”高度实验性”不是谦虚。目前的 H3 实现还缺乏一些生产级特性——连接迁移、0-RTT 重连的优化、大规模并发下的内存管理——但这个方向已经明确了：Bun 的目标是在协议层面做到不需要反向代理。</p>
+<h3 id="http2-客户端">HTTP/2 客户端</h3>
+<p>fetch() 在 v1.3.14 中新增了实验性 HTTP/2 支持。和 H2 服务器的搭配意味着同一个 TCP+TLS 连接可以被多个并发的 fetch() 请求复用：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="typescript"><code><span class="line"><span style="color:#7F848E;font-style:italic">// 自动使用 H2（如果服务端支持）</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> response</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> await</span><span style="color:#61AFEF"> fetch</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"https://example.com/api"</span><span style="color:#ABB2BF">, {</span></span>
+<span class="line"><span style="color:#E06C75">  protocol</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"h2"</span><span style="color:#ABB2BF">,  </span><span style="color:#7F848E;font-style:italic">// 可选: "h2" | "h3" | "http1.1"</span></span>
+<span class="line"><span style="color:#ABB2BF">});</span></span></code></pre>
+<p>H2 客户端还内置了对 CONTINUATION flood 攻击的防护——这是一个 CVE 级别的安全问题，某些畸形的 H2 帧会导致服务端内存耗尽。</p>
+<h3 id="http3-客户端">HTTP/3 客户端</h3>
+<p>fetch() 也支持通过 HTTP/3 发起请求。支持 <code>Alt-Svc</code> 头部自动升级——如果一个服务返回了 <code>Alt-Svc: h3=":443"</code>，下次 fetch 自动换成 QUIC。</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="typescript"><code><span class="line"><span style="color:#7F848E;font-style:italic">// 强制使用 HTTP/3</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> response</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> await</span><span style="color:#61AFEF"> fetch</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"https://h3-enabled.example.com"</span><span style="color:#ABB2BF">, {</span></span>
+<span class="line"><span style="color:#E06C75">  protocol</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"h3"</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#ABB2BF">});</span></span></code></pre>
+<hr>
+<h2 id="四no-orphans进程孤儿院关门了">四、—no-orphans：进程孤儿院关门了</h2>
+<p>当 Bun 作为父进程启动子进程，而父进程崩溃或被强制杀死时，子进程会成为”孤儿”继续运行——这是长期困扰 Node.js 进程管理的问题。</p>
+<p>v1.3.14 引入的 <code>--no-orphans</code> 标志解决了这个问题：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#61AFEF">bun</span><span style="color:#D19A66"> --no-orphans</span><span style="color:#98C379"> run</span><span style="color:#98C379"> server.ts</span></span></code></pre>
+<p>实现机制因平台而异：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>平台</th><th>机制</th></tr></thead><tbody><tr><td>Linux</td><td><code>prctl(PR_SET_PDEATHSIG, SIGTERM)</code></td></tr><tr><td>macOS</td><td>kqueue <code>EVFILT_PROC</code> + <code>NOTE_EXIT</code></td></tr><tr><td>Windows</td><td>Job Object +<code>SetProcessShutdownParameters</code></td></tr></tbody></table>
+<p>策略是”stop-verify-kill”：先发 SIGTERM 让子进程优雅退出，等待一段时间后检查是否仍在运行，如果还在就 SIGKILL。</p>
+<p>这个功能对于 Docker 容器内运行 Bun 的场景尤其重要——容器终止时，作为 PID 1 的 Bun 需要确保所有子进程在退出前被正确清理，否则容器会进入僵尸进程蔓延的状态。</p>
+<h3 id="processexecve">process.execve()</h3>
+<p>配套的 API 是 <code>process.execve()</code>，与 Node.js v24 的接口对齐——用新进程替换当前进程：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="typescript"><code><span class="line"><span style="color:#E5C07B">process</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">execve</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">"/usr/bin/node"</span><span style="color:#ABB2BF">, [</span><span style="color:#98C379">"--version"</span><span style="color:#ABB2BF">], {</span></span>
+<span class="line"><span style="color:#E06C75">  env</span><span style="color:#ABB2BF">: { ...</span><span style="color:#E5C07B">process</span><span style="color:#ABB2BF">.</span><span style="color:#E06C75">env</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">NODE_ENV</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"production"</span><span style="color:#ABB2BF"> },</span></span>
+<span class="line"><span style="color:#ABB2BF">});</span></span></code></pre>
+<hr>
+<h2 id="五fswatch-重写">五、fs.watch 重写</h2>
+<p>v1.3.14 重写了文件系统监听的核心实现。这不是小修小补——之前版本的 fs.watch 有多个长期未修复的问题：</p>
+<ul>
+<li><strong>Linux</strong>：递归监听时，新建的目录不会被自动订阅——导致用户必须在回调中手动 <code>fs.watch</code> 每一级子目录</li>
+<li><strong>macOS</strong>：创建后立即删除再重名的文件，不会有 change 事件触发</li>
+<li><strong>macOS</strong>：双线程架构（一个读 FSEvents，一个读 kqueue），在低端设备上额外线程的开销不可忽略</li>
+</ul>
+<p>新的实现统一使用 <strong>inotify（Linux）/ FSEvents（macOS）/ kqueue（FreeBSD）</strong>。在 macOS 上不再使用双线程，单线程处理 FSEvents 流，通过 <code>kqueue</code> 仅处理自建目录的拦截——线程数减半，唤醒次数减半。</p>
+<p>对于需要在 Webpack/Vite 热更新之外做精细化文件监听的场景（如自动重载配置、开发工具、构建管道），这次重写的价值是实实在在的。</p>
+<hr>
+<h2 id="六ssl_ctx-共享与连接池">六、SSL_CTX 共享与连接池</h2>
+<p>一个容易被忽略但影响面很大的修复：<strong>Shared SSL_CTX cache</strong>。</p>
+<p>问题背景：每次 TLS 连接都初始化一个独立的 SSL 上下文集。对于 MongoDB、Mongoose 这类会大量创建短连接的场景，每个连接额外消耗 ~50KB 的 TLS 状态。在高并发下（例如一个 Web API 服务每请求查询 MongoDB），内存增长很快。</p>
+<p>Bun 在 v1.3.14 中将 SSL_CTX 改为全局共享——同一目标地址的所有连接共享 SSL 会话上下文。对于 MongoDB/Mongoose 用户，内存泄漏问题基本消除；对于一般 fetch() 调用，TLS 握手开销也显著降低。</p>
+<hr>
+<h2 id="七跨语言-lto-与二进制瘦身">七、跨语言 LTO 与二进制瘦身</h2>
+<p>Zig 是一种编译时和 C ABI 交互非常方便的语言。Bun 的核心由 Zig 编写，上层绑定大量 C/C++ 库（libuv、lsquic、libarchive 等）。v1.3.14 引入了 <strong>Zig ↔ C++ 的跨语言链接时优化（LTO）</strong>。</p>
+<p>效果：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>指标</th><th>改善</th></tr></thead><tbody><tr><td>HTTP 处理</td><td>+3.5%</td></tr><tr><td>二进制大小（Windows）</td><td>-17MB</td></tr><tr><td>二进制大小（Linux）</td><td>-8MB</td></tr><tr><td>二进制大小（macOS）</td><td>-9MB</td></tr></tbody></table>
+<p>LTO 的难处在于 Zig 的编译模型和传统的 C++ LTO 不同。Bun 团队花了不少功夫让两者在 LLVM IR 层面能互相优化——例如 Zig 编译的矩阵运算代码直接内联到 C++ 的 JSON 序列化循环中。</p>
+<hr>
+<h2 id="八javascriptcore-升级与性能细节">八、JavaScriptCore 升级与性能细节</h2>
+<p>JSC（JavaScriptCore）在 Bun 中是底层引擎（Bun 不采用 V8）。v1.3.14 同步了上游 <strong>565 个提交</strong>，带来一系列性能改进：</p>
+<ul>
+<li><strong>更快的 async</strong>：async 函数的调用和创建开销降低了约 15%</li>
+<li><strong><code>Array.prototype.shift</code></strong>：shift 一个空数组不再分配新对象（这是一个常见的”问题代码”——<code>arr.shift()</code> 被误用的情况很多，JSC 现在优化了这个模式）</li>
+<li><strong>JSON.parse 短字符串</strong>：对小于 64 字节的 JSON 字符串采用快速路径</li>
+<li><strong><code>Intl.NumberFormat</code></strong>：格式化性能改进</li>
+<li><strong>Wasm relaxed SIMD</strong>：WebAssembly SIMD 指令集支持更广泛</li>
+</ul>
+<h3 id="esm-加载提速">ESM 加载提速</h3>
+<p>Bun 的模块加载器在这个版本中做了优化。根据官方 benchmark，加载 500 个 ES 模块从 140ms 降至 <strong>123ms（~12% 加速）</strong>。优化点主要是减少了模块解析时的字符串复制和哈希计算。</p>
+<h3 id="gc-开销降低">GC 开销降低</h3>
+<p>内置类（如 <code>Response</code>、<code>Request</code>、<code>URL</code>）的垃圾回收开销通过 JSC API 变更降低——不再需要每个实例都生成额外的包装对象。</p>
+<hr>
+<h2 id="九生态兼容性与修复">九、生态兼容性与修复</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>修复内容</th><th>影响</th></tr></thead><tbody><tr><td>Windows <code>tls.getCACertificates</code></td><td>macOS 不再因加载 CA 证书而 stall；Windows 能正确加载 Intermediate CA 和 TrustedPeople 存储</td></tr><tr><td><code>WebSocket perMessageDeflate: false</code></td><td>之前被忽略，现在被正确尊重</td></tr><tr><td>Windows <code>SIGHUP</code> / <code>SIGBREAK</code></td><td>现在可以注册信号处理器</td></tr><tr><td><code>Bun.Terminal</code> Windows</td><td>通过 ConPTY 实现终端 API，输入处理不再阻塞</td></tr><tr><td><code>using</code> / <code>await using</code></td><td>当 target=Bun 时，不再被降级为兼容代码——原生 JSC 支持</td></tr><tr><td><code>bun publish</code></td><td>现在把 README 发送到注册表了（之前漏了）</td></tr><tr><td><strong>SQLite</strong></td><td>升级到 3.53.0</td></tr><tr><td>FreeBSD / Android 构建</td><td>支持这两个平台</td></tr></tbody></table>
+<hr>
+<h2 id="十bun-正在变成什么">十、Bun 正在变成什么</h2>
+<p>从 v1.3.14 这个版本来看，Bun 的发展方向逐渐清晰：</p>
+<p>第一，<strong>内置替代原生模块</strong>。Bun.Image 是对 sharp 的替代——不是说 sharp 不好，而是”编译原生模块”这个流程本身就有问题。Bun 正在逐个消灭需要 <code>node-gyp</code> 或 <code>prebuild-install</code> 才能使用的场景。</p>
+<p>第二，<strong>协议层的内置支持</strong>。H2 和 H3 客户端/服务器意味着用户越来越不需要在 Bun 前面再放一个 Nginx 或 Caddy。对大多数中小型服务来说，Bun.serve 本身已经是一个够用的反向代理。</p>
+<p>第三，<strong>包管理器的工业化</strong>。全局虚拟存储的 115ms 安装时间把”安装依赖”这个操作从”去泡杯咖啡”变成了”打一个喷嚏就完了”。这个改进的受众不只是开发者——CI 流水线是更大的受益者。</p>
+<p>第四，<strong>跨语言优化的极限</strong>。Zig↔C++ LTO 说明 Bun 团队在挖掘 JavaScript 运行时底层的每一点性能潜力。3.5% 的 HTTP 加速看起来不大，但这个数字来自于链接时优化——不修改任何代码就能让所有用户受益，这是纯工程投入的回报。</p>
+<p>v1.3.14 不是 Bun 的一个”转折点”版本，但它密集地展示了这个项目的技术能力边界。从图像处理到 QUIC 协议栈到包缓存架构，Bun 正在覆盖越来越多传统上由不同独立工具处理的功能领域。这对于开发者意味着更少的工具链拼装和更一致的开发体验，对于运行时间意味着更少的跨进程通信开销和更大的优化空间。</p>
+<p>说 Bun 会取代 Node.js 可能还为时过早——它的生态兼容性还不是 100%，Windows 的支持虽然在大幅改进但仍有边缘情况。但 v1.3.14 传递的信号很明确：Bun 不是在做”又一个 Node 替代品”，它在重新定义”一个现代 JavaScript 运行时应该内置什么”。</p>
+<blockquote>
+<p>原创技术博客 · 开源项目分享 · AI全栈创作社区  <a href="https://idao.fun">idao.fun</a></p>
+</blockquote>   </article>  </main> <footer class="shadow-border bg-[#fafafa] dark:bg-[#0a0a0a] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <div class="mx-auto max-w-5xl px-4 py-12"> <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">iDao技术魔方</h3> <p class="text-sm leading-relaxed text-[#4d4d4d] dark:text-[#a3a3a3]">一枚全职独立开发者，懂全栈、爱开源、专注做优质技术内容，坐标成都。原创全栈技术内容，开源项目分享。</p> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">快速链接</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/blog" class="transition hover:text-primary dark:hover:text-[#ededed]">技术博客</a></li> <li><a href="/projects" class="transition hover:text-primary dark:hover:text-[#ededed]">开源项目</a></li> <li><a href="/utils" class="transition hover:text-primary dark:hover:text-[#ededed]">工具集</a></li> <li><a href="/ai" class="transition hover:text-primary dark:hover:text-[#ededed]">AI精选</a></li> <li><a href="/service" class="transition hover:text-primary dark:hover:text-[#ededed]">技术服务</a></li> <li><a href="/about" class="transition hover:text-primary dark:hover:text-[#ededed]">关于博主</a></li> <li><a href="/links" class="transition hover:text-primary dark:hover:text-[#ededed]">友情链接</a></li> <li><a href="/sponsor" class="transition hover:text-primary dark:hover:text-[#ededed]">赞助支持</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">联系</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="https://github.com/idao-cube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">GitHub</a></li> <li><a href="https://x.com/idaocube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">Twitter</a></li> <li><a href="mailto:hi@idao.fun" class="transition hover:text-primary dark:hover:text-[#ededed]">hi@idao.fun</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">其他</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/sitemap" class="transition hover:text-primary dark:hover:text-[#ededed]">站点地图</a></li> <li><a href="/privacy" class="transition hover:text-primary dark:hover:text-[#ededed]">隐私政策</a></li> <li><a href="/terms" class="transition hover:text-primary dark:hover:text-[#ededed]">服务条款</a></li> <li><a href="/search" class="transition hover:text-primary dark:hover:text-[#ededed]">站内搜索</a></li> </ul> </div> </div> <div class="mt-8 border-t border-gray-200 pt-6 text-center text-xs text-gray-500 dark:border-[#262626]"> <p>&copy; 2026 iDao技术魔方. All rights reserved. </p> <p class="pt-2">玩转技术魔方，创造数字未来 </p> <p class="pt-2">AI 友好索引：<a href="/llms.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms.txt</a> · <a href="/llms-full.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms-full.txt</a> · <a href="/sitemap.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">sitemap.xml</a> · <a href="/urls.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">urls.txt</a> · <a href="/rss.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">RSS</a></p> </div> </div> </footer> </body></html>

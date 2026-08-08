@@ -1,0 +1,252 @@
+<!DOCTYPE html><html lang="zh-CN" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="color-scheme" content="light dark"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" href="/favicon.ico"><link rel="alternate" type="application/rss+xml" title="iDao技术魔方 RSS Feed" href="/rss.xml"><!-- Anti-FOUC: theme init runs before first paint --><script>
+      (function() {
+        var stored = localStorage.getItem('theme')
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Reddit 宣布纯 HTML 不安全：从 old.reddit.com 封堵看开放式网页的终局 — iDao技术魔方</title><meta name="description" content="Reddit 以&#34;安全&#34;为由将 old.reddit.com 置于登录墙后，实际是在封堵数据抓取。深析这背后的 LLM 数据淘金热、互联网的&#34;平台化腐败&#34;循环，以及当纯 HTML 都被视为威胁时，开放 Web 还剩下什么。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="keywords" content="技术深度,全栈开发实战,AI应用落地,独立开发教程,iDao技术魔方,Reddit,开放互联网,LLM,数据抓取,平台化腐败,Web 历史"><!-- 作者信息（GEO：帮助大模型识别内容创作主体）--><meta name="author" content="iDao技术魔方"><!-- 技术信息 --><meta name="generator" content="Astro v6.1.9"><!-- 主题色（移动端浏览器标题栏着色，百度/Chrome 读取）--><meta name="theme-color" content="#0f172a"><!--Robots 指令: noindex/nofollow 精细控制 + 富摘要权限开放 --><meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- Googlebot 单独声明，优先级高于 robots --><meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- 百度蜘蛛单独声明 --><meta name="baiduspider" content="index"><!-- Canonical URL:   防止重复内容被搜索引擎分散权重 --><link rel="canonical" href="https://idao.fun/blog/2026-07-23-reddit-plain-html-unsafe"><!--Open Graph（Facebook / 微信 / 百度 / 飞书等读取） --><meta property="og:type" content="article"><meta property="og:site_name" content="iDao技术魔方"><meta property="og:title" content="Reddit 宣布纯 HTML 不安全：从 old.reddit.com 封堵看开放式网页的终局 — iDao技术魔方"><meta property="og:description" content="Reddit 以&#34;安全&#34;为由将 old.reddit.com 置于登录墙后，实际是在封堵数据抓取。深析这背后的 LLM 数据淘金热、互联网的&#34;平台化腐败&#34;循环，以及当纯 HTML 都被视为威胁时，开放 Web 还剩下什么。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta property="og:url" content="https://idao.fun/blog/2026-07-23-reddit-plain-html-unsafe"><meta property="og:locale" content="zh_CN"><!-- OG 图片：补全 alt / width / height，避免社交平台爬取失败 --><meta property="og:image" content="https://idao.fun/og-default.jpg"><meta property="og:image:alt" content="Reddit 宣布纯 HTML 不安全：从 old.reddit.com 封堵看开放式网页的终局 — iDao技术魔方"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/jpeg"><!-- 文章专属 OG（ogType='article' 时生效）--><meta property="article:published_time" content="2026-07-23T00:00:00.000Z"><meta property="article:author" content="iDao技术魔方"><!--Twitter / X Card：summary_large_image = 大图卡片，点击率更高 --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@idaocube"><meta name="twitter:creator" content="@idaocube"><meta name="twitter:title" content="Reddit 宣布纯 HTML 不安全：从 old.reddit.com 封堵看开放式网页的终局 — iDao技术魔方"><meta name="twitter:description" content="Reddit 以&#34;安全&#34;为由将 old.reddit.com 置于登录墙后，实际是在封堵数据抓取。深析这背后的 LLM 数据淘金热、互联网的&#34;平台化腐败&#34;循环，以及当纯 HTML 都被视为威胁时，开放 Web 还剩下什么。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="twitter:image" content="https://idao.fun/og-default.jpg"><meta name="twitter:image:alt" content="Reddit 宣布纯 HTML 不安全：从 old.reddit.com 封堵看开放式网页的终局 — iDao技术魔方"><meta name="baidu-site-verification" content="codeva-sdSzhlWkj2"><!-- JSON-LD 结构化数据：支持单个对象或数组，多 Schema 场景均兼容 /   GEO：结构化数据是大模型识别实体的最高优先级信号 --><script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://idao.fun/blog/2026-07-23-reddit-plain-html-unsafe","headline":"Reddit 宣布纯 HTML 不安全：从 old.reddit.com 封堵看开放式网页的终局","description":"Reddit 以\"安全\"为由将 old.reddit.com 置于登录墙后，实际是在封堵数据抓取。深析这背后的 LLM 数据淘金热、互联网的\"平台化腐败\"循环，以及当纯 HTML 都被视为威胁时，开放 Web 还剩下什么。","url":"https://idao.fun/blog/2026-07-23-reddit-plain-html-unsafe","image":"https://idao.fun/og-default.jpg","inLanguage":"zh-CN","datePublished":"2026-07-23T00:00:00.000Z","dateModified":"2026-07-23T00:00:00.000Z","author":{"@id":"https://idao.fun/#person","name":"iDao"},"publisher":{"@id":"https://idao.fun/#person","name":"iDao技术魔方"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://idao.fun/blog/2026-07-23-reddit-plain-html-unsafe"},"isPartOf":{"@id":"https://idao.fun/#website"},"keywords":"Reddit, 开放互联网, LLM, 数据抓取, 平台化腐败, Web 历史"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun/"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"技术深度","item":"https://idao.fun/blog/category/技术深度"},{"@type":"ListItem","position":4,"name":"Reddit 宣布纯 HTML 不安全：从 old.reddit.com 封堵看开放式网页的终局","item":"https://idao.fun/blog/2026-07-23-reddit-plain-html-unsafe"}]}</script><script type="module">if(window.location.host==="idao.fun"){const t=window;t._hmt=t._hmt||[],(function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?15119693b771cc9cecf522df17636f96";var c=document.getElementsByTagName("script")[0];c.parentNode?.insertBefore(e,c)})()}</script><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-5R9SGFG1Z8"></script><script type="module">if(window.location.host==="idao.fun"){let t=function(...n){a.dataLayer.push(n)};const a=window;a.dataLayer=a.dataLayer||[],t("js",new Date),t("config","G-5R9SGFG1Z8")}</script><link rel="stylesheet" href="/_astro/seoHelpers.M1mEo6Z0.css"></head> <body class="min-h-screen bg-white font-sans text-primary antialiased dark:bg-[#0a0a0a] dark:text-[#ededed]"> <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-border dark:bg-[#0a0a0a]/80 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <nav class="mx-auto flex h-16 max-w-5xl items-center justify-between px-4"> <!-- Logo --> <a href="/" class="flex items-center gap-2 text-lg font-semibold tracking-[-0.02em] text-primary dark:text-[#ededed]"> <!-- <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white">i</span> --> <div class="h-6 w-6 bg-white rounded-lg flex items-center justify-center"> <img src="/favicon.svg" alt="iDao技术魔方" class="h-6 w-6"> </div> <span class="hidden sm:inline">iDao技术魔方</span> </a> <!-- PC Nav: hidden on mobile, flex on md+ --> <div class="hidden md:flex items-center gap-1"> <a href="/" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="relative px-3 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="absolute bottom-0 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-primary dark:bg-[#ededed]"></span> </a><a href="/utils" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <button id="theme-toggle" class="ml-2 flex items-center gap-1.5 rounded-md px-2 py-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式" title="切换暗色模式"> <svg class="block h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden text-sm">暗色</span> <span class="hidden dark:inline text-sm">亮色</span> </button> </div> <!-- Mobile Hamburger: hidden on md+ --> <button id="mobile-menu-toggle" class="md:hidden rounded-md p-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="打开导航菜单" title="打开导航菜单"> <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path> </svg> </button> </nav> <!-- Mobile Menu: hidden by default, toggled via JS --> <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 dark:border-[#1a1a1a] bg-white/80 backdrop-blur-md dark:bg-[#0a0a0a]/80"> <div class="mx-auto max-w-5xl flex flex-col px-4 py-3 gap-1"> <a href="/" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="ml-2 h-0.5 w-5 _inline-block rounded-full bg-primary dark:bg-[#ededed] hidden sm:inline-block"></span> </a><a href="/utils" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <!-- Mobile Theme Toggle --> <button id="mobile-theme-toggle" class="mt-2 flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式"> <svg class="block h-4 w-4 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-4 w-4 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden">切换到暗色模式</span> <span class="hidden dark:inline">切换到亮色模式</span> </button> </div> </div> </header> <script type="module">function o(e){const l=document.getElementById(e);l&&l.addEventListener("click",()=>{const i=document.documentElement.classList.toggle("dark");localStorage.setItem("theme",i?"dark":"light"),l.setAttribute("aria-label",i?"切换到亮色模式":"切换暗色模式")})}o("theme-toggle");o("mobile-theme-toggle");const n=document.getElementById("mobile-menu-toggle"),t=document.getElementById("mobile-menu");n?.addEventListener("click",()=>{t?.classList.toggle("hidden");const e=!t?.classList.contains("hidden");n.setAttribute("aria-label",e?"关闭导航菜单":"打开导航菜单")});t?.querySelectorAll("a").forEach(e=>{e.addEventListener("click",()=>{t?.classList.add("hidden"),n?.setAttribute("aria-label","打开导航菜单")})});</script> <main class="mx-auto max-w-5xl px-4 py-8">  <article class="prose mx-auto max-w-3xl dark:prose-invert"> <a href="/blog" class="text-sm text-[#666] dark:text-[#a3a3a3] no-underline">← 返回博客</a> <nav aria-label="面包屑导航" class="mb-6"> <ol class="flex flex-wrap items-center gap-1 text-sm text-[#666] dark:text-[#a3a3a3] px-0"> <li class="flex items-center gap-1">  <a href="https://idao.fun" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">首页</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">博客</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog/category/技术深度" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">技术深度</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <span class="text-primary dark:text-[#ededed] hidden sm:inline" aria-current="page">Reddit 宣布纯 HTML 不安全：从 old.reddit.com 封堵看开放式网页的终局</span> </li> </ol> </nav> <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"技术深度","item":"https://idao.fun/blog/category/技术深度"},{"@type":"ListItem","position":4,"name":"Reddit 宣布纯 HTML 不安全：从 old.reddit.com 封堵看开放式网页的终局","item":""}]}</script>  <header class="not-prose mb-8"> <h1 class="text-3xl font-bold tracking-[-0.02em] text-primary dark:text-[#ededed]">Reddit 宣布纯 HTML 不安全：从 old.reddit.com 封堵看开放式网页的终局</h1> <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-[#666] dark:text-[#a3a3a3]"> <time datetime="2026-07-23T00:00:00.000Z"> 2026年7月23日 </time>  <a href="/blog/category/技术深度" class="rounded-md bg-[#fafafa] px-2.5 py-1 text-[#4d4d4d] transition hover:bg-gray-100 dark:bg-[#262626] dark:text-[#a3a3a3] dark:hover:bg-[#333]"> 技术深度 </a> </div> <div class="mt-3 flex flex-wrap gap-2"> <a href="/blog/tag/Reddit" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Reddit </a><a href="/blog/tag/开放互联网" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#开放互联网 </a><a href="/blog/tag/LLM" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#LLM </a><a href="/blog/tag/数据抓取" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#数据抓取 </a><a href="/blog/tag/平台化腐败" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#平台化腐败 </a><a href="/blog/tag/Web 历史" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Web 历史 </a> </div> </header>  <h2 id="写在前面">写在前面</h2>
+<p>2026 年 7 月 21 日，Reddit 悄悄地做了一个决定：<code>old.reddit.com</code>——那个不需要 JavaScript、纯 HTML、快速、轻量的经典界面——现在需要登录才能访问。官方理由是”为了安全”。但 Reddit 对新版界面（new.reddit.com）却没有施加相同的限制。</p>
+<p>这篇文章从 Reddit 最近的这次变动出发，追溯 2023 年 API 风波以来的平台演进，分析”安全”背后的真正动机——LLM 时代的训练数据争夺战，以及一个更深层的趋势：当纯 HTML 都被视为威胁时，开放式 Web 正在走向何方。</p>
+<hr>
+<h2 id="一这次到底发生了什么">一、这次到底发生了什么</h2>
+<h3 id="11-oldredditcom-的退休前奏">1.1 old.reddit.com 的”退休”前奏</h3>
+<p>2026 年 7 月 21 日，Reddit 在 <code>r/modnews</code> 发布了一则公告[^1]：</p>
+<blockquote>
+<p>“Old Reddit’s logged-out experience is a significant source of abusive scraping and automated traffic on the platform.”</p>
+</blockquote>
+<p>翻译成大白话：<strong>未登录状态的旧版 Reddit 是爬虫和机器流量的主要源头。</strong></p>
+<p>自此，访问 <code>old.reddit.com</code> 会被重定向到登录页面。未登录用户只能看到一张截图和登录按钮。</p>
+<h3 id="12-为什么不限制新版-reddit">1.2 为什么不限制新版 Reddit？</h3>
+<p>有用户直接在公告帖中提出了这个问题：</p>
+<blockquote>
+<p>“新 Reddit 和旧 Reddit 有什么不同，以至于旧版容易被爬、新版就不会？难道爬虫不会转而爬新版吗？”</p>
+</blockquote>
+<p>Reddit 管理员的回复耐人寻味：</p>
+<blockquote>
+<p>“恶意流量的形态在不断变化。这是一个猫鼠游戏……旧 Reddit 缺少现代安全技术栈。”</p>
+</blockquote>
+<p>注意这个措辞：<strong>现代安全技术栈</strong>。这里的”现代”，翻译过来就是 JavaScript。</p>
+<h3 id="13-数据对比old-vs-new">1.3 数据对比：Old vs. New</h3>
+<p>一位开发者[^2]做了页面加载比对，数据最能说明问题：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>指标</th><th>Old Reddit</th><th>New Reddit</th><th>差异</th></tr></thead><tbody><tr><td>页面请求数</td><td>33</td><td>112</td><td>3.4x</td></tr><tr><td>传输数据量</td><td>~1 MB</td><td>~5 MB</td><td>5x</td></tr><tr><td>加载时间</td><td>~2s</td><td>~3s</td><td>1.5x</td></tr><tr><td>默认加载评论数</td><td>200</td><td>25</td><td>0.125x</td></tr><tr><td>加载更多评论请求数</td><td>4</td><td>94</td><td>23.5x</td></tr><tr><td>是否需要 JS</td><td>否</td><td>是</td><td>—</td></tr></tbody></table>
+<p>Old Reddit 是一个<strong>正常的网页</strong>——服务器返回 HTML，浏览器渲染，你读内容。它快、轻、甚至不需要 JavaScript（“加载更多评论”除外）。</p>
+<p>New Reddit 是一个<strong>单页应用</strong>——服务器返回一个空壳，JavaScript 下载后渲染一切。它慢了 50%、重了 5 倍、每一个操作都伴随着心跳请求（每 0.5 秒一次滚动/鼠标追踪）。</p>
+<hr>
+<h2 id="二安全背后的真实动机">二、“安全”背后的真实动机</h2>
+<h3 id="21-安全真的不安全吗">2.1 安全真的不安全吗？</h3>
+<p>让我们先认真看待 Reddit 的说法：Old Reddit 是否真的有安全风险？</p>
+<p>Old Reddit <strong>就是一个纯 HTML 页面渲染服务</strong>。它没有复杂的客户端状态管理，没有 WebSocket 连接，没有 Service Worker，没有 JavaScript bundle。它做的是 Web 最原始、最核心的事情：接收 HTTP 请求，返回 HTML。</p>
+<p>如果你说这样的架构有”安全问题”，而一个需要执行 2MB JavaScript 才能看到内容的 SPA（单页应用）更安全——这在技术上是站不住脚的。纯 HTML 的攻击面远小于复杂的客户端渲染应用。</p>
+<h3 id="22-真正的动机控制数据访问">2.2 真正的动机：控制数据访问</h3>
+<p>Reddit 不想被爬，这一点完全合理——它是一家公司，它拥有用户生成的数据，它不希望别人免费拿走这些数据。</p>
+<p>但”我不希望你拿走”和”这是为了你的安全”是两回事。</p>
+<p>Old Reddit 的问题是：<strong>它太好爬了</strong>。纯 HTML 意味着爬虫不需要执行 JavaScript、不需要处理 Webpack 打包的 chunk、不需要处理客户端渲染——只需要一个 HTTP 请求，HTML 就全部到手了。</p>
+<p>New Reddit 的”安全优势”实际上是<strong>通过代码膨胀实现的阻挠</strong>：</p>
+<ul>
+<li>112 个请求代替 33 个</li>
+<li>JavaScript 执行代替 HTML 解析</li>
+<li>心跳追踪代替静态页面</li>
+<li>复杂的客户端状态代替直接的 DOM</li>
+</ul>
+<p>这不是安全，这是<strong>通过降低效率来阻止抓取</strong>。</p>
+<h3 id="23-管理员的坦诚版本">2.3 管理员的坦诚版本</h3>
+<p>公告帖中有管理员给出了一段相对坦诚的回答：</p>
+<blockquote>
+<p>“恶意流量的形态总是在变。这是一个猫鼠游戏……旧 Reddit 没有现代安全技术栈，这正在成为一个越来越大的挑战。”</p>
+</blockquote>
+<p>注意这里的”安全”其实是个幌子——<strong>真正的”现代安全技术栈”应该是反爬虫系统、速率限制验证码、浏览器指纹检测和行为分析，这些跟前端用不用 React 毫无关系。</strong></p>
+<p>如果 Reddit 真心想解决爬虫问题，它们可以在 Old Reddit 上加 Cloudflare Turnstile、加 rate limiting、加浏览器指纹。它们没有这么做，是因为问题的根源不在安全 —— 而在<strong>经济</strong>。</p>
+<hr>
+<h2 id="三2023-2026reddit-的三年数据围城">三、2023-2026：Reddit 的三年数据围城</h2>
+<h3 id="31-2023-年-api-收费事件">3.1 2023 年 API 收费事件</h3>
+<p>2023 年，Reddit 宣布对 API 访问收费，引发了自成立以来最大的社区抗议。大量 subreddit 关站、第三方客户端（Apollo、Sync、Reddit is Fun）集体死亡。</p>
+<p>当时的核心理由也是”AI 公司免费使用 Reddit 数据训练模型”。</p>
+<h3 id="32-2024-2025围墙逐步加高">3.2 2024-2025：围墙逐步加高</h3>
+<p>API 收费后的两年间，Reddit 逐步筑墙：</p>
+<ul>
+<li>限制未登录访问的搜索功能</li>
+<li>在 New Reddit 中引入更多遥测和追踪</li>
+<li>与 Google 达成数据授权协议（据报道价值 6000 万美元/年）</li>
+<li>对 AI 训练数据访问进行商业化</li>
+</ul>
+<h3 id="33-2026最后的堡垒">3.3 2026：最后的堡垒</h3>
+<p>Old Reddit 是 Reddit 围墙的最后缺口。它轻量、开放、无需登录即可阅读所有内容。它也是 LLM 训练数据抓取的首选目标——不是因为安全性弱，而是因为<strong>效率高</strong>。</p>
+<p>封堵 Old Reddit 的未登录访问，是这个缺口的最后一块砖。</p>
+<hr>
+<h2 id="四llm-时代的数据保护区">四、LLM 时代的”数据保护区”</h2>
+<h3 id="41-用户生成内容的战略价值">4.1 用户生成内容的战略价值</h3>
+<p>AI 时代的核心资源不是算力，不是算法，而是<strong>高质量的人类生成数据</strong>。</p>
+<p>Reddit 的用户生成内容有独特的价值：</p>
+<ol>
+<li><strong>对话结构</strong>：问题-回答-讨论，天然的训练数据格式</li>
+<li><strong>多样性</strong>：覆盖几乎所有话题——从编程到烹饪到哲学</li>
+<li><strong>时效性</strong>：持续更新的实时数据</li>
+<li><strong>真实性</strong>：人类写的，不是 AI 生成的</li>
+</ol>
+<h3 id="42-开放与封闭的悖论">4.2 开放与封闭的悖论</h3>
+<p>Reddit 面临一个根本性的矛盾：</p>
+<ul>
+<li><strong>对用户</strong>：Reddit 需要内容免费阅读，才能维持流量和参与度</li>
+<li><strong>对 AI 公司</strong>：Reddit 需要限制数据访问，才能将这些数据商业化</li>
+</ul>
+<p>这个悖论没有优雅的解决方案。所有 UGC 平台都在这个矛盾中挣扎：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>平台</th><th>策略</th></tr></thead><tbody><tr><td>Reddit</td><td>API 收费 + 登录墙 + Google 数据授权</td></tr><tr><td>Twitter/X</td><td>API 分层、阅读限制、Grok 训练数据</td></tr><tr><td>Stack Overflow</td><td>与 OpenAI 达成数据授权协议</td></tr><tr><td>Medium</td><td>付费墙 + 禁止 AI 爬虫</td></tr></tbody></table>
+<h3 id="43-安全成为标准话术">4.3 “安全”成为标准话术</h3>
+<p>值得注意的是，所有平台在限制数据访问时，几乎都使用了类似的措辞：</p>
+<ul>
+<li><strong>“保护用户安全”</strong></li>
+<li><strong>“防止恶意爬虫”</strong></li>
+<li><strong>“保护平台完整性”</strong></li>
+</ul>
+<p>这些话术的普遍性，恰恰暗示了它们真正指向的是同一个目标：<strong>控制数据流向</strong>。</p>
+<hr>
+<h2 id="五old-reddit-与开放式-web-的理想">五、Old Reddit 与开放式 Web 的理想</h2>
+<h3 id="51-old-reddit-是什么">5.1 Old Reddit 是什么</h3>
+<p>Old Reddit 不是一个设计——是一个<strong>哲学</strong>。</p>
+<p>它代表了对 Web 的一种特定理解：<strong>网页是文档，不是应用</strong>。服务器返回结构化的内容，浏览器渲染它，用户阅读它。没有追踪、没有遥测、没有 JavaScript bundle、不需要登录。</p>
+<p>这种模式有几个重要特性：</p>
+<ul>
+<li><strong>可被搜索引擎索引</strong>：纯 HTML 对搜索引擎友好</li>
+<li><strong>可被归档</strong>：Internet Archive 可以保存完整的页面</li>
+<li><strong>可被辅助技术访问</strong>：屏幕阅读器不需要处理复杂的 JS 状态</li>
+<li><strong>可被 RSS 消费</strong>：内容可以推送到独立的阅读器</li>
+<li><strong>不需要登录</strong>：知识是公开的</li>
+</ul>
+<h3 id="52-开放式-web-的三原则">5.2 开放式 Web 的三原则</h3>
+<p>Old Reddit 的关闭触及了一个更大的问题：开放式 Web 正在变成封闭式平台。</p>
+<p>开放式 Web 建立在三个原则之上：</p>
+<ol>
+<li><strong>内容可链接</strong>：任意 URL 可以被任何人访问</li>
+<li><strong>内容可索引</strong>：搜索引擎可以抓取和检索内容</li>
+<li><strong>内容可归档</strong>：历史记录可以被保存和回放</li>
+</ol>
+<p>登录墙打破了第一条原则。如果 URL 需要认证才能访问，它就不再是一个”链接”——它变成了一个”入口”。</p>
+<h3 id="53-平台的演化从开放到封闭">5.3 平台的演化：从开放到封闭</h3>
+<p>所有平台都遵循一个类似的轨迹：</p>
+<ol>
+<li><strong>开放期</strong>：快速增长，公开内容，API 免费</li>
+<li><strong>变现期</strong>：引入广告，开始收集数据</li>
+<li><strong>围墙期</strong>：限制 API，要求登录，控制数据</li>
+<li><strong>封闭期</strong>：完全的围墙花园，数据只进不出</li>
+</ol>
+<p>Reddit 在 2026 年正处于围墙期到封闭期的过渡阶段。Old Reddit 的登录墙是这个过渡的标志性事件。</p>
+<hr>
+<h2 id="六那些不该被忘记的数据">六、那些不该被忘记的数据</h2>
+<h3 id="61-互联网的数据黑暗时代">6.1 互联网的”数据黑暗时代”</h3>
+<p>每一条被锁在登录墙后的内容，都在制造互联网的”数据黑暗时代”。</p>
+<p>想想那些被 Reddit 论坛锁住的讨论帖：</p>
+<ul>
+<li>2018 年有人问的”如何修复这个编程 bug”，答案对今天仍然有用</li>
+<li>2016 年关于某个罕见疾病的讨论，是患者唯一能找到的信息来源</li>
+<li>2020 年关于某个小众爱好者的指南，十年内都没有被超越</li>
+</ul>
+<h3 id="62-平台的承诺与背叛">6.2 平台的承诺与背叛</h3>
+<p>Reddit 的核心承诺是：“社区的档案馆”。但当一个平台决定将公共内容变成私有资产时，它背叛了这个承诺。</p>
+<p>用户贡献内容是<strong>免费的</strong>，基于一个隐含的理解：这些内容将公开可访问。当平台将内容锁起来时，它不是在保护用户——它是在将用户贡献的价值<strong>资本化</strong>。</p>
+<h3 id="63-去中心化替代方案">6.3 去中心化替代方案</h3>
+<p>如果 Reddit 提供了无可替代的价值，也许问题不在于 Reddit，而在于缺乏真正的替代选择。</p>
+<p>可选的路径：</p>
+<ul>
+<li><strong>Lemmy</strong>：ActivityPub 协议的去中心化论坛网络</li>
+<li><strong>Discourse</strong>：自托管论坛</li>
+<li><strong>静态论坛</strong>：基于 Markdown 的静态社区</li>
+<li><strong>个人博客与 RSS</strong>：去中心化的发布方式</li>
+</ul>
+<p>但这些替代方案面临冷启动问题：<strong>网络效应是 Reddit 的护城河</strong>。</p>
+<hr>
+<h2 id="七结论纯-html-不安全不等于平台应该锁门">七、结论：纯 HTML 不安全，不等于平台应该锁门</h2>
+<p>Reddit 说”纯 HTML 不安全”。</p>
+<p>从技术角度说，纯 HTML 的攻击面确实比 SPA 小。但 Reddit 不是在谈论安全——它在谈论<strong>控制</strong>。</p>
+<p>Old Reddit 是 Web 上一个罕见的存在：一个大型平台提供的公开、可抓取、无需 JavaScript 的正常 HTML 网站。它的存在本身就是对”Web 必须是应用平台”这个预设的挑战。这也是它被关闭的原因——不是因为它不安全，而是因为它太<strong>好用</strong>了。</p>
+<p>对于普通用户来说，这意味着：</p>
+<ul>
+<li>你的搜索结果中来自 Reddit 的内容将逐渐减少</li>
+<li>你可能需要在 Reddit 注册账号才能阅读原本公开的内容</li>
+<li>平台上积累的知识正在变成私人资产</li>
+</ul>
+<p>对于开发者来说，这是一个更深层的信号：如果你在乎开放 Web，你可能不应该在封闭平台构建你的社区。</p>
+<p>对于整个互联网来说，这是一个令人担忧的先例：如果连纯 HTML 都被认为是”不安全”的，那还有什么不是？</p>
+<hr>
+<blockquote>
+<p>原创技术博客 · 开源项目分享 · AI全栈创作社区  <a href="https://idao.fun">idao.fun</a></p>
+</blockquote>   </article>  </main> <footer class="shadow-border bg-[#fafafa] dark:bg-[#0a0a0a] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <div class="mx-auto max-w-5xl px-4 py-12"> <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">iDao技术魔方</h3> <p class="text-sm leading-relaxed text-[#4d4d4d] dark:text-[#a3a3a3]">一枚全职独立开发者，懂全栈、爱开源、专注做优质技术内容，坐标成都。原创全栈技术内容，开源项目分享。</p> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">快速链接</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/blog" class="transition hover:text-primary dark:hover:text-[#ededed]">技术博客</a></li> <li><a href="/projects" class="transition hover:text-primary dark:hover:text-[#ededed]">开源项目</a></li> <li><a href="/utils" class="transition hover:text-primary dark:hover:text-[#ededed]">工具集</a></li> <li><a href="/ai" class="transition hover:text-primary dark:hover:text-[#ededed]">AI精选</a></li> <li><a href="/service" class="transition hover:text-primary dark:hover:text-[#ededed]">技术服务</a></li> <li><a href="/about" class="transition hover:text-primary dark:hover:text-[#ededed]">关于博主</a></li> <li><a href="/links" class="transition hover:text-primary dark:hover:text-[#ededed]">友情链接</a></li> <li><a href="/sponsor" class="transition hover:text-primary dark:hover:text-[#ededed]">赞助支持</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">联系</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="https://github.com/idao-cube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">GitHub</a></li> <li><a href="https://x.com/idaocube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">Twitter</a></li> <li><a href="mailto:hi@idao.fun" class="transition hover:text-primary dark:hover:text-[#ededed]">hi@idao.fun</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">其他</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/sitemap" class="transition hover:text-primary dark:hover:text-[#ededed]">站点地图</a></li> <li><a href="/privacy" class="transition hover:text-primary dark:hover:text-[#ededed]">隐私政策</a></li> <li><a href="/terms" class="transition hover:text-primary dark:hover:text-[#ededed]">服务条款</a></li> <li><a href="/search" class="transition hover:text-primary dark:hover:text-[#ededed]">站内搜索</a></li> </ul> </div> </div> <div class="mt-8 border-t border-gray-200 pt-6 text-center text-xs text-gray-500 dark:border-[#262626]"> <p>&copy; 2026 iDao技术魔方. All rights reserved. </p> <p class="pt-2">玩转技术魔方，创造数字未来 </p> <p class="pt-2">AI 友好索引：<a href="/llms.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms.txt</a> · <a href="/llms-full.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms-full.txt</a> · <a href="/sitemap.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">sitemap.xml</a> · <a href="/urls.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">urls.txt</a> · <a href="/rss.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">RSS</a></p> </div> </div> </footer> </body></html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html><html lang="zh-CN" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="color-scheme" content="light dark"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" href="/favicon.ico"><link rel="alternate" type="application/rss+xml" title="iDao技术魔方 RSS Feed" href="/rss.xml"><!-- Anti-FOUC: theme init runs before first paint --><script>
+      (function() {
+        var stored = localStorage.getItem('theme')
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>TypeScript 7.0 RC 深度解读：Go 重写完成，10 倍提速，编译器的「奇点时刻」 — iDao技术魔方</title><meta name="description" content="TypeScript 7.0 RC 正式发布——历经一年的 Go 重写工程终于面世。10 倍性能提升、并行类型检查、Parcel 级文件监听、Unicode 感知模板字面量类型……这是 TypeScript 编译器的一次「材料替换」，其意义不亚于从 JavaScript 到原生代码的跃迁。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="keywords" content="技术深度,全栈开发实战,AI应用落地,独立开发教程,iDao技术魔方,TypeScript,Go,编译器,编程语言,前端,深度"><!-- 作者信息（GEO：帮助大模型识别内容创作主体）--><meta name="author" content="iDao技术魔方"><!-- 技术信息 --><meta name="generator" content="Astro v6.1.9"><!-- 主题色（移动端浏览器标题栏着色，百度/Chrome 读取）--><meta name="theme-color" content="#0f172a"><!--Robots 指令: noindex/nofollow 精细控制 + 富摘要权限开放 --><meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- Googlebot 单独声明，优先级高于 robots --><meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- 百度蜘蛛单独声明 --><meta name="baiduspider" content="index"><!-- Canonical URL:   防止重复内容被搜索引擎分散权重 --><link rel="canonical" href="https://idao.fun/blog/2026-07-09-typescript-7-rc-deep-dive"><!--Open Graph（Facebook / 微信 / 百度 / 飞书等读取） --><meta property="og:type" content="article"><meta property="og:site_name" content="iDao技术魔方"><meta property="og:title" content="TypeScript 7.0 RC 深度解读：Go 重写完成，10 倍提速，编译器的「奇点时刻」 — iDao技术魔方"><meta property="og:description" content="TypeScript 7.0 RC 正式发布——历经一年的 Go 重写工程终于面世。10 倍性能提升、并行类型检查、Parcel 级文件监听、Unicode 感知模板字面量类型……这是 TypeScript 编译器的一次「材料替换」，其意义不亚于从 JavaScript 到原生代码的跃迁。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta property="og:url" content="https://idao.fun/blog/2026-07-09-typescript-7-rc-deep-dive"><meta property="og:locale" content="zh_CN"><!-- OG 图片：补全 alt / width / height，避免社交平台爬取失败 --><meta property="og:image" content="https://idao.fun/og-default.jpg"><meta property="og:image:alt" content="TypeScript 7.0 RC 深度解读：Go 重写完成，10 倍提速，编译器的「奇点时刻」 — iDao技术魔方"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/jpeg"><!-- 文章专属 OG（ogType='article' 时生效）--><meta property="article:published_time" content="2026-07-09T00:00:00.000Z"><meta property="article:author" content="iDao技术魔方"><!--Twitter / X Card：summary_large_image = 大图卡片，点击率更高 --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@idaocube"><meta name="twitter:creator" content="@idaocube"><meta name="twitter:title" content="TypeScript 7.0 RC 深度解读：Go 重写完成，10 倍提速，编译器的「奇点时刻」 — iDao技术魔方"><meta name="twitter:description" content="TypeScript 7.0 RC 正式发布——历经一年的 Go 重写工程终于面世。10 倍性能提升、并行类型检查、Parcel 级文件监听、Unicode 感知模板字面量类型……这是 TypeScript 编译器的一次「材料替换」，其意义不亚于从 JavaScript 到原生代码的跃迁。 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="twitter:image" content="https://idao.fun/og-default.jpg"><meta name="twitter:image:alt" content="TypeScript 7.0 RC 深度解读：Go 重写完成，10 倍提速，编译器的「奇点时刻」 — iDao技术魔方"><meta name="baidu-site-verification" content="codeva-sdSzhlWkj2"><!-- JSON-LD 结构化数据：支持单个对象或数组，多 Schema 场景均兼容 /   GEO：结构化数据是大模型识别实体的最高优先级信号 --><script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://idao.fun/blog/2026-07-09-typescript-7-rc-deep-dive","headline":"TypeScript 7.0 RC 深度解读：Go 重写完成，10 倍提速，编译器的「奇点时刻」","description":"TypeScript 7.0 RC 正式发布——历经一年的 Go 重写工程终于面世。10 倍性能提升、并行类型检查、Parcel 级文件监听、Unicode 感知模板字面量类型……这是 TypeScript 编译器的一次「材料替换」，其意义不亚于从 JavaScript 到原生代码的跃迁。","url":"https://idao.fun/blog/2026-07-09-typescript-7-rc-deep-dive","image":"https://idao.fun/og-default.jpg","inLanguage":"zh-CN","datePublished":"2026-07-09T00:00:00.000Z","dateModified":"2026-07-09T00:00:00.000Z","author":{"@id":"https://idao.fun/#person","name":"iDao"},"publisher":{"@id":"https://idao.fun/#person","name":"iDao技术魔方"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://idao.fun/blog/2026-07-09-typescript-7-rc-deep-dive"},"isPartOf":{"@id":"https://idao.fun/#website"},"keywords":"TypeScript, Go, 编译器, 编程语言, 前端, 深度"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun/"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"技术深度","item":"https://idao.fun/blog/category/技术深度"},{"@type":"ListItem","position":4,"name":"TypeScript 7.0 RC 深度解读：Go 重写完成，10 倍提速，编译器的「奇点时刻」","item":"https://idao.fun/blog/2026-07-09-typescript-7-rc-deep-dive"}]}</script><script type="module">if(window.location.host==="idao.fun"){const t=window;t._hmt=t._hmt||[],(function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?15119693b771cc9cecf522df17636f96";var c=document.getElementsByTagName("script")[0];c.parentNode?.insertBefore(e,c)})()}</script><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-5R9SGFG1Z8"></script><script type="module">if(window.location.host==="idao.fun"){let t=function(...n){a.dataLayer.push(n)};const a=window;a.dataLayer=a.dataLayer||[],t("js",new Date),t("config","G-5R9SGFG1Z8")}</script><link rel="stylesheet" href="/_astro/seoHelpers.M1mEo6Z0.css"></head> <body class="min-h-screen bg-white font-sans text-primary antialiased dark:bg-[#0a0a0a] dark:text-[#ededed]"> <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-border dark:bg-[#0a0a0a]/80 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <nav class="mx-auto flex h-16 max-w-5xl items-center justify-between px-4"> <!-- Logo --> <a href="/" class="flex items-center gap-2 text-lg font-semibold tracking-[-0.02em] text-primary dark:text-[#ededed]"> <!-- <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white">i</span> --> <div class="h-6 w-6 bg-white rounded-lg flex items-center justify-center"> <img src="/favicon.svg" alt="iDao技术魔方" class="h-6 w-6"> </div> <span class="hidden sm:inline">iDao技术魔方</span> </a> <!-- PC Nav: hidden on mobile, flex on md+ --> <div class="hidden md:flex items-center gap-1"> <a href="/" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="relative px-3 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="absolute bottom-0 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-primary dark:bg-[#ededed]"></span> </a><a href="/utils" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <button id="theme-toggle" class="ml-2 flex items-center gap-1.5 rounded-md px-2 py-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式" title="切换暗色模式"> <svg class="block h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden text-sm">暗色</span> <span class="hidden dark:inline text-sm">亮色</span> </button> </div> <!-- Mobile Hamburger: hidden on md+ --> <button id="mobile-menu-toggle" class="md:hidden rounded-md p-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="打开导航菜单" title="打开导航菜单"> <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path> </svg> </button> </nav> <!-- Mobile Menu: hidden by default, toggled via JS --> <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 dark:border-[#1a1a1a] bg-white/80 backdrop-blur-md dark:bg-[#0a0a0a]/80"> <div class="mx-auto max-w-5xl flex flex-col px-4 py-3 gap-1"> <a href="/" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="ml-2 h-0.5 w-5 _inline-block rounded-full bg-primary dark:bg-[#ededed] hidden sm:inline-block"></span> </a><a href="/utils" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <!-- Mobile Theme Toggle --> <button id="mobile-theme-toggle" class="mt-2 flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式"> <svg class="block h-4 w-4 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-4 w-4 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden">切换到暗色模式</span> <span class="hidden dark:inline">切换到亮色模式</span> </button> </div> </div> </header> <script type="module">function o(e){const l=document.getElementById(e);l&&l.addEventListener("click",()=>{const i=document.documentElement.classList.toggle("dark");localStorage.setItem("theme",i?"dark":"light"),l.setAttribute("aria-label",i?"切换到亮色模式":"切换暗色模式")})}o("theme-toggle");o("mobile-theme-toggle");const n=document.getElementById("mobile-menu-toggle"),t=document.getElementById("mobile-menu");n?.addEventListener("click",()=>{t?.classList.toggle("hidden");const e=!t?.classList.contains("hidden");n.setAttribute("aria-label",e?"关闭导航菜单":"打开导航菜单")});t?.querySelectorAll("a").forEach(e=>{e.addEventListener("click",()=>{t?.classList.add("hidden"),n?.setAttribute("aria-label","打开导航菜单")})});</script> <main class="mx-auto max-w-5xl px-4 py-8">  <article class="prose mx-auto max-w-3xl dark:prose-invert"> <a href="/blog" class="text-sm text-[#666] dark:text-[#a3a3a3] no-underline">← 返回博客</a> <nav aria-label="面包屑导航" class="mb-6"> <ol class="flex flex-wrap items-center gap-1 text-sm text-[#666] dark:text-[#a3a3a3] px-0"> <li class="flex items-center gap-1">  <a href="https://idao.fun" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">首页</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">博客</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog/category/技术深度" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">技术深度</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <span class="text-primary dark:text-[#ededed] hidden sm:inline" aria-current="page">TypeScript 7.0 RC 深度解读：Go 重写完成，10 倍提速，编译器的「奇点时刻」</span> </li> </ol> </nav> <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"技术深度","item":"https://idao.fun/blog/category/技术深度"},{"@type":"ListItem","position":4,"name":"TypeScript 7.0 RC 深度解读：Go 重写完成，10 倍提速，编译器的「奇点时刻」","item":""}]}</script>  <header class="not-prose mb-8"> <h1 class="text-3xl font-bold tracking-[-0.02em] text-primary dark:text-[#ededed]">TypeScript 7.0 RC 深度解读：Go 重写完成，10 倍提速，编译器的「奇点时刻」</h1> <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-[#666] dark:text-[#a3a3a3]"> <time datetime="2026-07-09T00:00:00.000Z"> 2026年7月9日 </time>  <a href="/blog/category/技术深度" class="rounded-md bg-[#fafafa] px-2.5 py-1 text-[#4d4d4d] transition hover:bg-gray-100 dark:bg-[#262626] dark:text-[#a3a3a3] dark:hover:bg-[#333]"> 技术深度 </a> </div> <div class="mt-3 flex flex-wrap gap-2"> <a href="/blog/tag/TypeScript" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#TypeScript </a><a href="/blog/tag/Go" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Go </a><a href="/blog/tag/编译器" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#编译器 </a><a href="/blog/tag/编程语言" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#编程语言 </a><a href="/blog/tag/前端" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#前端 </a><a href="/blog/tag/深度" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#深度 </a> </div> </header>  <blockquote>
+<p>2026 年 6 月 18 日，TypeScript 团队发布了 7.0 RC。这不是一个普通的 semver major 版本——TypeScript 编译器的核心从 TypeScript/JavaScript 完全移植到了 <strong>Go</strong>。结果是在大型代码库上 <strong>常出现 10 倍的性能提升</strong>。</p>
+<p>这是微软继 2025 年底官宣 Go 移植计划之后，交出的第一份正式答卷。</p>
+</blockquote>
+<h2 id="一这不是另一个版本这是一次材料替换">一、这不是「另一个版本」，这是一次材料替换</h2>
+<p>要理解 TypeScript 7.0 的意义，需要先理解 TypeScript 编译器面临的根本性困境。</p>
+<p>TypeScript 编译器（tsc）是用 TypeScript 本身编写的——这很常见：自举编译器在编程语言世界里并不罕见。但随着 TypeScript 代码库的增长，问题逐渐暴露出来：</p>
+<ol>
+<li><strong>单线程</strong> —— JavaScript 天生单线程（Worker 线程有共享内存的限制）</li>
+<li><strong>大内存开销</strong> —— 对大型 monorepo 来说，tsc 的峰值内存使用经常以 GB 计</li>
+<li><strong>增量构建的先天劣势</strong> —— 每次 <code>--watch</code> 模式的文件变更都需要重新处理大量 AST</li>
+</ol>
+<p>TypeScript 团队在 2023-2025 年间做了大量优化（5.x 版本的 <code>--build</code> 模式优化、declaration map、isolatedDeclarations 等），但这些都是在 JavaScript 引擎的「天花板」下进行的修补。</p>
+<p><strong>Go 重写从根本上改变了这个格局。</strong></p>
+<p>共享内存并行、原生编译速度、无 GC 停顿——这些不是 JavaScript 运行时可以提供的特性。TypeScript 7.0 保留了与 6.0 <strong>结构一致的类型检查逻辑</strong>（不是重写逻辑，而是「直译」了实现），然后在 Go 的并发模型上重新部署整个管道。</p>
+<p>Daniel Rosenwasser（TypeScript PM）的原话：</p>
+<blockquote>
+<p>「新代码库是从现有实现方法式地移植而来，而非从头重写，其类型检查逻辑在结构上与 TypeScript 6.0 相同。这种架构同构性确保编译器继续执行你已依赖的完全相同语义。」</p>
+</blockquote>
+<h2 id="二性能10-倍从哪里来">二、性能：10 倍从哪里来？</h2>
+<h3 id="21-解析和发射的天然并行">2.1 解析和发射的天然并行</h3>
+<p>TypeScript 构建管道中的某些步骤——解析（parsing）和发射（emitting）——在不同文件之间几乎完全独立。在 Go 中，这些步骤可以无摩擦地并行化。</p>
+<h3 id="22-类型检查器的共享内存并行">2.2 类型检查器的共享内存并行</h3>
+<p>类型检查是最复杂的部分。一个文件的类型信息依赖于它所导入的其他文件——你不能简单地把每个文件分给不同线程独立检查。</p>
+<p>TypeScript 7.0 的解决方案：<strong>创建一个固定数量的类型检查器 worker</strong>（默认 4 个），每个 worker 有自己的「世界观」。它们可能会重复一些公共工作（比如检查全局类型声明），但由于输入相同、划分策略一致，<strong>结果总是确定的</strong>。</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 调整并行度</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> tsc</span><span style="color:#D19A66"> --checkers</span><span style="color:#D19A66"> 8</span><span style="color:#7F848E;font-style:italic">   # 大型代码库增加并行度</span></span>
+<span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> tsc</span><span style="color:#D19A66"> --checkers</span><span style="color:#D19A66"> 2</span><span style="color:#7F848E;font-style:italic">   # CI 环境减少内存占用</span></span></code></pre>
+<p>新增的 <code>--checkers</code> 标志允许用户配置 worker 数量。需要留意——增加 worker 数通常意味着更高的内存使用。</p>
+<h3 id="23-项目引用构建器的并行化">2.3 项目引用构建器的并行化</h3>
+<p>对于 monorepo 场景，TypeScript 7.0 还引入了 <code>--builders</code> 标志，控制同时构建的项目引用数量。</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#61AFEF">npx</span><span style="color:#98C379"> tsc</span><span style="color:#D19A66"> --build</span><span style="color:#D19A66"> --builders</span><span style="color:#D19A66"> 4</span></span></code></pre>
+<p><code>--checkers</code> 和 <code>--builders</code> 有乘法效应——<code>--checkers 4 --builders 4</code> 允许最多 16 个类型检查器同时运行。找到适合你机器和代码库的平衡点很重要。</p>
+<h3 id="24-单线程模式">2.4 单线程模式</h3>
+<p>为了调试、对比性能或资源受限环境，新增了 <code>--singleThreaded</code> 标志，它会强制所有工作在单个线程中执行。</p>
+<h2 id="三--watch-模式的重建parcel-的-go-移植">三、<code>--watch</code> 模式的重建：Parcel 的 Go 移植</h2>
+<p>TypeScript 6 及更早版本的 <code>--watch</code> 模式一直存在性能问题——在大项目中，尤其是 <code>node_modules</code> 繁多的 monorepo 中，文件监听器（watcher）的开销非常显著。</p>
+<p>Go 标准库没有提供内置的文件系统监听 API。团队尝试了第三方库，发现存在稳定性、性能和跨平台支持方面的问题。他们构建了基于轮询的解决方案——<strong>但在大规模项目中，纯轮询的计算开销太高。</strong></p>
+<p>灵感来自 VS Code 多年来使用的 <code>@parcel/watcher</code>。Parcel 的 watcher 是用 C++ 编写的——依赖完整的 C++ 工具链来构建，这是 TypeScript 团队不想引入的。</p>
+<p>于是他们做了一个「疯狂的工程决定」：<strong>将 Parcel watcher 从 C++ 移植到 Go</strong>，只保留极少量的汇编 shim。</p>
+<p>结果是明确的成功——移植版通过了原有的测试套件，并进一步「Go 化」（从直译逐步重构为更符合 Go 习惯的实现），同时保持了跨平台的高效文件名变更检测。</p>
+<p>Devon Govett（Parcel 作者）在致谢中被特别提及。这是一个跨越 C++ → Go → TypeScript 的生态级反馈循环。</p>
+<h2 id="四从-5x-到-70-的配置断层">四、从 5.x 到 7.0 的配置断层</h2>
+<p>TypeScript 7.0 继承了 6.0 的新默认值，并对废弃配置提供<strong>硬错误</strong>。这意味着如果项目从 5.x 直接跳到 7.0，将面临相当大的配置冲击。</p>
+<p>新默认值一览：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>配置项</th><th>默认值</th></tr></thead><tbody><tr><td><code>strict</code></td><td><code>true</code></td></tr><tr><td><code>module</code></td><td><code>esnext</code></td></tr><tr><td><code>target</code></td><td>当前稳定 ECMAScript 版本</td></tr><tr><td><code>noUncheckedSideEffectImports</code></td><td><code>true</code></td></tr><tr><td><code>libReplacement</code></td><td><code>false</code></td></tr><tr><td><code>stableTypeOrdering</code></td><td><code>true</code>（不可关闭）</td></tr><tr><td><code>rootDir</code></td><td><code>./</code>（需显式设置源目录）</td></tr><tr><td><code>types</code></td><td><code>[]</code>（旧行为需设为 <code>["*"]</code>）</td></tr></tbody></table>
+<p>其中 <code>rootDir</code> 和 <code>types</code> 是最容易造成「惊喜」的变更：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#7F848E;font-style:italic">// 如果 tsconfig.json 在项目根而非 src/ 内</span></span>
+<span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "compilerOptions"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "rootDir"</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">"./src"</span><span style="color:#7F848E;font-style:italic">  // 必须显式指定</span></span>
+<span class="line"><span style="color:#ABB2BF">  },</span></span>
+<span class="line"><span style="color:#E06C75">  "include"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"./src"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre>
+<p><code>types</code> 从「自动加载所有 <code>@types/*</code>」变为「空列表」，意味着原来隐式可用的全局声明（如 <code>node</code>、<code>jest</code>、<code>bun</code>、<code>mocha</code>）现在需要显式声明：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#ABB2BF">{</span></span>
+<span class="line"><span style="color:#E06C75">  "compilerOptions"</span><span style="color:#ABB2BF">: {</span></span>
+<span class="line"><span style="color:#E06C75">    "types"</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">"node"</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">"jest"</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">}</span></span></code></pre>
+<p><strong>已变为硬错误的废弃项：</strong></p>
+<ul>
+<li><code>target: es5</code> — 完全移除</li>
+<li><code>downlevelIteration</code> — 不再支持</li>
+<li><code>moduleResolution: node/node10</code> — 推荐 <code>nodenext</code> 或 <code>bundler</code></li>
+<li><code>module: amd/umd/systemjs/none</code> — 推荐 <code>esnext</code> 或 <code>preserve</code></li>
+<li><code>baseUrl</code> — 不再支持（<code>paths</code> 改为相对于项目根）</li>
+<li><code>esModuleInterop</code> 和 <code>allowSyntheticDefaultImports</code> — 不可设为 <code>false</code></li>
+<li><code>alwaysStrict</code> — 始终为 <code>true</code></li>
+<li><code>module</code> 关键字不可在 namespace 声明中使用</li>
+<li><code>asserts</code> 关键字不可在 import 上使用（须用 <code>with</code>）</li>
+</ul>
+<p>TypeScript 团队的建议很坦诚：<strong>先升级到 6.0，再迁移到 7.0。</strong> 6.0 本身已经引入了同样的破坏性变更，但 7.0 将它们从不推荐（deprecation）升级到了强制执行。</p>
+<h2 id="五模板字面量类型的-unicode-代码点感知">五、模板字面量类型的 Unicode 代码点感知</h2>
+<p>这是 7.0 中一个有趣的有意破坏性变更。</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="typescript"><code><span class="line"><span style="color:#C678DD">type</span><span style="color:#E5C07B"> HeadTail</span><span style="color:#ABB2BF">&#x3C;</span><span style="color:#E5C07B">S</span><span style="color:#ABB2BF">> </span><span style="color:#56B6C2">=</span><span style="color:#E5C07B"> S</span><span style="color:#C678DD"> extends</span><span style="color:#98C379"> `</span><span style="color:#C678DD">${</span><span style="color:#ABB2BF">infer </span><span style="color:#E5C07B">Head</span><span style="color:#C678DD">}${</span><span style="color:#ABB2BF">infer </span><span style="color:#E5C07B">Tail</span><span style="color:#C678DD">}</span><span style="color:#98C379">`</span><span style="color:#C678DD"> ?</span><span style="color:#ABB2BF"> [</span><span style="color:#E5C07B">Head</span><span style="color:#ABB2BF">, </span><span style="color:#E5C07B">Tail</span><span style="color:#ABB2BF">] </span><span style="color:#C678DD">:</span><span style="color:#E5C07B"> never</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">type</span><span style="color:#E5C07B"> Result</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> HeadTail</span><span style="color:#ABB2BF">&#x3C;</span><span style="color:#98C379">"😀abc"</span><span style="color:#ABB2BF">>;</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 7.0:   ["😀", "abc"]</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 6.0:   ["\ud83d", "\ude00abc"]</span></span></code></pre>
+<p>之前 TypeScript 遵循 JavaScript 的 UTF-16 索引行为——将 <code>"😀"</code> 拆成两个半代理对（<code>\ud83d</code> 和 <code>\ude00</code>）。技术上与 JavaScript 的 <code>"😀abc"[0]</code> 行为一致，但几乎不是开发者的真实意图。</p>
+<p>TypeScript 7.0 改为 Unicode 代码点感知——<code>for...of</code> 和 <code>[...str]</code> 的行为。这是有道理的：大多数人是 <strong>think in code points</strong>，不是 UTF-16 代码单元。</p>
+<p>这会破坏一些在类型层面做字符串操作的工具库——比如那些用 template literal 实现字符串 <code>Length</code> 类型的。在实践中，我们预计新行为更有用，也<strong>更少意外</strong>。</p>
+<h2 id="六javascript-支持的重构">六、JavaScript 支持的重构</h2>
+<p>TypeScript 的 JS 支持（基于 JSDoc 的类型推断）在 7.0 中也经历了重构，以更接近 <code>.ts</code> 文件的类型分析方式：</p>
+<p><strong>不再支持的 JSDoc 模式：</strong></p>
+<ul>
+<li>在类型位置使用值——必须写 <code>typeof someValue</code></li>
+<li><code>@enum</code> — 改用 <code>@typedef</code> 加 <code>keyof typeof</code></li>
+<li>独立的 <code>?</code> 作为类型——改用 <code>any</code></li>
+<li><code>@class</code> — 改用 <code>class</code> 声明</li>
+<li>后缀 <code>!</code> — 直接用 <code>T</code></li>
+<li>Closure 风格的函数类型语法 <code>function(string): void</code> — 改用 <code>(s: string) => void</code></li>
+<li>类型名必须定义在 <code>@typedef</code> 标签内，而非紧贴在标识符旁</li>
+</ul>
+<p>这些变化对纯 JS 项目的类型检查有影响。团队维护了一个 <a href="https://github.com/microsoft/typescript-go/blob/main/CHANGES.md"><code>CHANGES.md</code></a> 追踪详细差异。</p>
+<h2 id="七与-typescript-60-的共存策略">七、与 TypeScript 6.0 的共存策略</h2>
+<p>TypeScript 7.0 的稳定程序化 API 要到 7.1 才能就绪。在这之前，如何让依赖 <code>typescript</code> 包的生态工具（如 typescript-eslint）继续工作？</p>
+<p>微软的解决方案：<strong><code>@typescript/typescript6</code> 兼容包</strong>。</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#7F848E;font-style:italic"># 安装 TS 6.0 兼容包（提供 tsc6 命令）</span></span>
+<span class="line"><span style="color:#61AFEF">npm</span><span style="color:#98C379"> install</span><span style="color:#D19A66"> -D</span><span style="color:#98C379"> typescript@npm:@typescript/typescript6@^6.0.0</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 同时安装 TS 7.0 RC（提供 tsc 命令）</span></span>
+<span class="line"><span style="color:#61AFEF">npm</span><span style="color:#98C379"> install</span><span style="color:#D19A66"> -D</span><span style="color:#98C379"> typescript-7@npm:typescript@rc</span></span></code></pre>
+<p>这个方案的核心思路是通过 npm aliases 让 <code>typescript</code> 包名指向 6.x，而 7.0 使用独立包名共存。同时，TypeScript 7 的 nightly 构建继续在 <code>@typescript/native-preview</code> 下发布，但正式版后将统一到 <code>typescript</code> 包。</p>
+<h2 id="八编辑器体验与-lsp">八、编辑器体验与 LSP</h2>
+<p>TypeScript 7.0 基于语言服务器协议（LSP）构建，可以在任何支持 LSP 的编辑器中使用。针对 VS Code，团队发布了一个专门的 <strong>TypeScript Native Preview 扩展</strong>。</p>
+<p>RC 阶段补全了 beta 中缺失的功能：</p>
+<ul>
+<li>自动导入（Auto-imports）</li>
+<li>可展开的 Hover 信息</li>
+<li>Inlay Hints</li>
+<li>Code Lenses</li>
+<li>Go-to-source-definition</li>
+<li>JSX Linked Editing 和 Tag Completions</li>
+<li>语法高亮</li>
+<li>“Sort imports” / “Remove unused imports”</li>
+</ul>
+<p>团队重建了测试和诊断基础设施，<strong>对 GitHub 上最热门的 TypeScript 和 JavaScript 代码库进行 fuzz 测试</strong>。数据表明，TypeScript 7 的语言服务器失败命令比 6.0 减少了 <strong>20 倍以上</strong>。</p>
+<h2 id="九生态合作与验证">九、生态合作与验证</h2>
+<p>TypeScript 7 已经经过了大范围的实际验证：</p>
+<ul>
+<li><strong>微软内部</strong> — 多个团队使用超过一年</li>
+<li><strong>外部合作伙伴</strong> — Bloomberg、Canva、Figma、Google、Lattice、Linear、Miro、Notion、Slack、Vanta、Vercel、VoidZero 等</li>
+<li><strong>多百万行代码库</strong> — 在多个百万行级的代码库上经过测试</li>
+</ul>
+<p>反馈高度一致：<strong>构建时间大幅缩短，编辑体验更轻量更流畅。</strong></p>
+<p>VoidZero（Rolldown/Oxc 背后的公司）作为合作伙伴出现值得关注——他们在 Rust/Go 构建工具的生态位中与 TypeScript Go 移植形成了一个「工具链的南北桥」。</p>
+<h2 id="十这是更大的图景javascript-生态的去-js-化">十、这是更大的图景：JavaScript 生态的「去 JS 化」</h2>
+<p>TypeScript 7 加入了一个正在形成的大趋势：<strong>JavaScript 生态的核心基础设施正在离开 JavaScript。</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>项目</th><th>原始语言</th><th>目标语言</th><th>状态</th></tr></thead><tbody><tr><td>TypeScript (tsc)</td><td>TypeScript</td><td>Go</td><td>7.0 RC</td></tr><tr><td>esbuild</td><td>Go</td><td>—</td><td>生产中</td></tr><tr><td>Bun</td><td>Zig → Rust</td><td>Rust</td><td>v1.4</td></tr><tr><td>Oxc</td><td>—</td><td>Rust</td><td>生产中</td></tr><tr><td>Rspack</td><td>—</td><td>Rust</td><td>生产中</td></tr><tr><td>Rolldown</td><td>—</td><td>Rust</td><td>开发中</td></tr><tr><td>Parcel 2</td><td>JS → Rust</td><td>Rust</td><td>已发布</td></tr><tr><td>Rome → Biome</td><td>TS → Rust</td><td>Rust</td><td>生产中</td></tr></tbody></table>
+<p>这个清单越来越长。原因是系统性的：<strong>构建工具、编译器和 linter 的性能天花板在 JavaScript 运行时中已经碰壁了</strong>，而这些工具恰好又是「CPU 密集型 + 高度可并行 + 可缓存」的理想工作负载，天然适合原生语言。</p>
+<p>有趣的是，TypeScript 选择的是 Go 而不是 Rust。这与 Go 的简单性、快速的编译时间、以及更容易的跨语言移植有关。TypeScript 团队的 Go 移植保留了与 JS 实现相同的架构逻辑——他们不是重写类型系统，而是「翻译」它。Go 的 goroutine + 共享内存并发模型让并行化更加直接，不需要处理 Rust 的 borrow checker 带来的迁移成本。</p>
+<h2 id="十一路线图与展望">十一、路线图与展望</h2>
+<p>当前计划：</p>
+<ul>
+<li><strong>一个月内发布 TypeScript 7.0 稳定版</strong></li>
+<li>此后几个月发布 <strong>TypeScript 7.1</strong>（稳定程序化 API）</li>
+</ul>
+<p>短期内最需要关注的两件事：</p>
+<ol>
+<li><strong>工具的迁移</strong> — typescript-eslint、ts-jest、Rollup 插件等依赖 <code>typescript</code> API 的工具需要适配 7.0</li>
+<li><strong>配置迁移</strong> — 从 5.x 直接跳到 7.0 的项目需要处理配置冲击</li>
+</ol>
+<p>对于绝大多数 TypeScript 用户，如果已经在用 6.0 并设置了所有新默认值，迁移到 7.0 几乎是透明的——只是变得更快。</p>
+<h2 id="结语">结语</h2>
+<p>TypeScript 7.0 不是一次「特性发布」。它是一个 <strong>工程的声明</strong>——用行动表明 JavaScript 生态的发展瓶颈可以被突破，而方法是换一种方式思考基础设施的构建。</p>
+<p>我没有用「里程碑」这个词——用「分水岭」更合适。</p>
+<p>从 7.0 RC 之后，TypeScript 编译器不再受限于单线程 JavaScript 运行时的性能边界。后续版本的创新速度——新语言特性、更智能的类型推断、更快的增量构建——都不再需要顾虑「这会让 tsc 变得更慢」。</p>
+<p>在 Go 的抽象之上，TypeScript 团队获得了他们过去十年不曾拥有的工程自由度。</p>
+<blockquote>
+<p>RC 发布博客：<a href="https://devblogs.microsoft.com/typescript/announcing-typescript-7-0-rc/">Announcing TypeScript 7.0 RC</a></p>
+<p>试用：<code>npm install -D typescript@rc</code></p>
+</blockquote>
+<blockquote>
+<p>原创技术博客 · 开源项目分享 · AI全栈创作社区  <a href="https://idao.fun">idao.fun</a></p>
+</blockquote>   </article>  </main> <footer class="shadow-border bg-[#fafafa] dark:bg-[#0a0a0a] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <div class="mx-auto max-w-5xl px-4 py-12"> <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">iDao技术魔方</h3> <p class="text-sm leading-relaxed text-[#4d4d4d] dark:text-[#a3a3a3]">一枚全职独立开发者，懂全栈、爱开源、专注做优质技术内容，坐标成都。原创全栈技术内容，开源项目分享。</p> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">快速链接</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/blog" class="transition hover:text-primary dark:hover:text-[#ededed]">技术博客</a></li> <li><a href="/projects" class="transition hover:text-primary dark:hover:text-[#ededed]">开源项目</a></li> <li><a href="/utils" class="transition hover:text-primary dark:hover:text-[#ededed]">工具集</a></li> <li><a href="/ai" class="transition hover:text-primary dark:hover:text-[#ededed]">AI精选</a></li> <li><a href="/service" class="transition hover:text-primary dark:hover:text-[#ededed]">技术服务</a></li> <li><a href="/about" class="transition hover:text-primary dark:hover:text-[#ededed]">关于博主</a></li> <li><a href="/links" class="transition hover:text-primary dark:hover:text-[#ededed]">友情链接</a></li> <li><a href="/sponsor" class="transition hover:text-primary dark:hover:text-[#ededed]">赞助支持</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">联系</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="https://github.com/idao-cube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">GitHub</a></li> <li><a href="https://x.com/idaocube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">Twitter</a></li> <li><a href="mailto:hi@idao.fun" class="transition hover:text-primary dark:hover:text-[#ededed]">hi@idao.fun</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">其他</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/sitemap" class="transition hover:text-primary dark:hover:text-[#ededed]">站点地图</a></li> <li><a href="/privacy" class="transition hover:text-primary dark:hover:text-[#ededed]">隐私政策</a></li> <li><a href="/terms" class="transition hover:text-primary dark:hover:text-[#ededed]">服务条款</a></li> <li><a href="/search" class="transition hover:text-primary dark:hover:text-[#ededed]">站内搜索</a></li> </ul> </div> </div> <div class="mt-8 border-t border-gray-200 pt-6 text-center text-xs text-gray-500 dark:border-[#262626]"> <p>&copy; 2026 iDao技术魔方. All rights reserved. </p> <p class="pt-2">玩转技术魔方，创造数字未来 </p> <p class="pt-2">AI 友好索引：<a href="/llms.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms.txt</a> · <a href="/llms-full.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms-full.txt</a> · <a href="/sitemap.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">sitemap.xml</a> · <a href="/urls.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">urls.txt</a> · <a href="/rss.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">RSS</a></p> </div> </div> </footer> </body></html>

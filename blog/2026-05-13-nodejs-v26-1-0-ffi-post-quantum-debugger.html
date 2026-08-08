@@ -1,0 +1,346 @@
+<!DOCTYPE html><html lang="zh-CN" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="color-scheme" content="light dark"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" href="/favicon.ico"><link rel="alternate" type="application/rss+xml" title="iDao技术魔方 RSS Feed" href="/rss.xml"><!-- Anti-FOUC: theme init runs before first paint --><script>
+      (function() {
+        var stored = localStorage.getItem('theme')
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Node.js v26.1.0 深度解读：FFI、后量子密码与调试器的进化 — iDao技术魔方</title><meta name="description" content="全面解析 Node.js 26.1.0 版本——实验性 node:ffi 原生模块调用、后量子密码学支持、调试器运行时探针、测试框架成熟化，以及 OpenSSL/V8/nghttp2 等基础设施升级 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="keywords" content="技术深度,全栈开发实战,AI应用落地,独立开发教程,iDao技术魔方,Node.js,FFI,Post-Quantum,Cryptography,Debugger,QUIC,Test Runner,OpenSSL"><!-- 作者信息（GEO：帮助大模型识别内容创作主体）--><meta name="author" content="iDao技术魔方"><!-- 技术信息 --><meta name="generator" content="Astro v6.1.9"><!-- 主题色（移动端浏览器标题栏着色，百度/Chrome 读取）--><meta name="theme-color" content="#0f172a"><!--Robots 指令: noindex/nofollow 精细控制 + 富摘要权限开放 --><meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- Googlebot 单独声明，优先级高于 robots --><meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"><!-- 百度蜘蛛单独声明 --><meta name="baiduspider" content="index"><!-- Canonical URL:   防止重复内容被搜索引擎分散权重 --><link rel="canonical" href="https://idao.fun/blog/2026-05-13-nodejs-v26-1-0-ffi-post-quantum-debugger"><!--Open Graph（Facebook / 微信 / 百度 / 飞书等读取） --><meta property="og:type" content="article"><meta property="og:site_name" content="iDao技术魔方"><meta property="og:title" content="Node.js v26.1.0 深度解读：FFI、后量子密码与调试器的进化 — iDao技术魔方"><meta property="og:description" content="全面解析 Node.js 26.1.0 版本——实验性 node:ffi 原生模块调用、后量子密码学支持、调试器运行时探针、测试框架成熟化，以及 OpenSSL/V8/nghttp2 等基础设施升级 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta property="og:url" content="https://idao.fun/blog/2026-05-13-nodejs-v26-1-0-ffi-post-quantum-debugger"><meta property="og:locale" content="zh_CN"><!-- OG 图片：补全 alt / width / height，避免社交平台爬取失败 --><meta property="og:image" content="https://idao.fun/og-default.jpg"><meta property="og:image:alt" content="Node.js v26.1.0 深度解读：FFI、后量子密码与调试器的进化 — iDao技术魔方"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/jpeg"><!-- 文章专属 OG（ogType='article' 时生效）--><meta property="article:published_time" content="2026-05-13T00:00:00.000Z"><meta property="article:author" content="iDao技术魔方"><!--Twitter / X Card：summary_large_image = 大图卡片，点击率更高 --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@idaocube"><meta name="twitter:creator" content="@idaocube"><meta name="twitter:title" content="Node.js v26.1.0 深度解读：FFI、后量子密码与调试器的进化 — iDao技术魔方"><meta name="twitter:description" content="全面解析 Node.js 26.1.0 版本——实验性 node:ffi 原生模块调用、后量子密码学支持、调试器运行时探针、测试框架成熟化，以及 OpenSSL/V8/nghttp2 等基础设施升级 iDao技术魔方原创实战教程，适合独立开发者与全栈工程师实操参考。"><meta name="twitter:image" content="https://idao.fun/og-default.jpg"><meta name="twitter:image:alt" content="Node.js v26.1.0 深度解读：FFI、后量子密码与调试器的进化 — iDao技术魔方"><meta name="baidu-site-verification" content="codeva-sdSzhlWkj2"><!-- JSON-LD 结构化数据：支持单个对象或数组，多 Schema 场景均兼容 /   GEO：结构化数据是大模型识别实体的最高优先级信号 --><script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://idao.fun/blog/2026-05-13-nodejs-v26-1-0-ffi-post-quantum-debugger","headline":"Node.js v26.1.0 深度解读：FFI、后量子密码与调试器的进化","description":"全面解析 Node.js 26.1.0 版本——实验性 node:ffi 原生模块调用、后量子密码学支持、调试器运行时探针、测试框架成熟化，以及 OpenSSL/V8/nghttp2 等基础设施升级","url":"https://idao.fun/blog/2026-05-13-nodejs-v26-1-0-ffi-post-quantum-debugger","image":"https://idao.fun/og-default.jpg","inLanguage":"zh-CN","datePublished":"2026-05-13T00:00:00.000Z","dateModified":"2026-05-13T00:00:00.000Z","author":{"@id":"https://idao.fun/#person","name":"iDao"},"publisher":{"@id":"https://idao.fun/#person","name":"iDao技术魔方"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://idao.fun/blog/2026-05-13-nodejs-v26-1-0-ffi-post-quantum-debugger"},"isPartOf":{"@id":"https://idao.fun/#website"},"keywords":"Node.js, FFI, Post-Quantum, Cryptography, Debugger, QUIC, Test Runner, OpenSSL"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun/"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"技术深度","item":"https://idao.fun/blog/category/技术深度"},{"@type":"ListItem","position":4,"name":"Node.js v26.1.0 深度解读：FFI、后量子密码与调试器的进化","item":"https://idao.fun/blog/2026-05-13-nodejs-v26-1-0-ffi-post-quantum-debugger"}]}</script><script type="module">if(window.location.host==="idao.fun"){const t=window;t._hmt=t._hmt||[],(function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?15119693b771cc9cecf522df17636f96";var c=document.getElementsByTagName("script")[0];c.parentNode?.insertBefore(e,c)})()}</script><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-5R9SGFG1Z8"></script><script type="module">if(window.location.host==="idao.fun"){let t=function(...n){a.dataLayer.push(n)};const a=window;a.dataLayer=a.dataLayer||[],t("js",new Date),t("config","G-5R9SGFG1Z8")}</script><link rel="stylesheet" href="/_astro/seoHelpers.M1mEo6Z0.css"></head> <body class="min-h-screen bg-white font-sans text-primary antialiased dark:bg-[#0a0a0a] dark:text-[#ededed]"> <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-border dark:bg-[#0a0a0a]/80 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <nav class="mx-auto flex h-16 max-w-5xl items-center justify-between px-4"> <!-- Logo --> <a href="/" class="flex items-center gap-2 text-lg font-semibold tracking-[-0.02em] text-primary dark:text-[#ededed]"> <!-- <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white">i</span> --> <div class="h-6 w-6 bg-white rounded-lg flex items-center justify-center"> <img src="/favicon.svg" alt="iDao技术魔方" class="h-6 w-6"> </div> <span class="hidden sm:inline">iDao技术魔方</span> </a> <!-- PC Nav: hidden on mobile, flex on md+ --> <div class="hidden md:flex items-center gap-1"> <a href="/" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="relative px-3 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="absolute bottom-0 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-primary dark:bg-[#ededed]"></span> </a><a href="/utils" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="relative px-3 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <button id="theme-toggle" class="ml-2 flex items-center gap-1.5 rounded-md px-2 py-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式" title="切换暗色模式"> <svg class="block h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden text-sm">暗色</span> <span class="hidden dark:inline text-sm">亮色</span> </button> </div> <!-- Mobile Hamburger: hidden on md+ --> <button id="mobile-menu-toggle" class="md:hidden rounded-md p-2 text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="打开导航菜单" title="打开导航菜单"> <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path> </svg> </button> </nav> <!-- Mobile Menu: hidden by default, toggled via JS --> <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 dark:border-[#1a1a1a] bg-white/80 backdrop-blur-md dark:bg-[#0a0a0a]/80"> <div class="mx-auto max-w-5xl flex flex-col px-4 py-3 gap-1"> <a href="/" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 首页  </a><a href="/blog" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition text-primary dark:text-[#ededed]" aria-current="page"> 博客 <span class="ml-2 h-0.5 w-5 _inline-block rounded-full bg-primary dark:bg-[#ededed] hidden sm:inline-block"></span> </a><a href="/utils" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 工具集  </a><a href="/ai" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> AI精选  </a><a href="/projects" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 项目  </a><a href="/about" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 关于  </a><a href="/service" class="block relative px-3 py-2.5 py-2 text-sm font-medium transition rounded-md text-[#4d4d4d] hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]"> 服务  </a> <!-- Mobile Theme Toggle --> <button id="mobile-theme-toggle" class="mt-2 flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-gray-500 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#1a1a1a]" aria-label="切换暗色模式"> <svg class="block h-4 w-4 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path> </svg> <svg class="hidden h-4 w-4 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"> <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path> </svg> <span class="dark:hidden">切换到暗色模式</span> <span class="hidden dark:inline">切换到亮色模式</span> </button> </div> </div> </header> <script type="module">function o(e){const l=document.getElementById(e);l&&l.addEventListener("click",()=>{const i=document.documentElement.classList.toggle("dark");localStorage.setItem("theme",i?"dark":"light"),l.setAttribute("aria-label",i?"切换到亮色模式":"切换暗色模式")})}o("theme-toggle");o("mobile-theme-toggle");const n=document.getElementById("mobile-menu-toggle"),t=document.getElementById("mobile-menu");n?.addEventListener("click",()=>{t?.classList.toggle("hidden");const e=!t?.classList.contains("hidden");n.setAttribute("aria-label",e?"关闭导航菜单":"打开导航菜单")});t?.querySelectorAll("a").forEach(e=>{e.addEventListener("click",()=>{t?.classList.add("hidden"),n?.setAttribute("aria-label","打开导航菜单")})});</script> <main class="mx-auto max-w-5xl px-4 py-8">  <article class="prose mx-auto max-w-3xl dark:prose-invert"> <a href="/blog" class="text-sm text-[#666] dark:text-[#a3a3a3] no-underline">← 返回博客</a> <nav aria-label="面包屑导航" class="mb-6"> <ol class="flex flex-wrap items-center gap-1 text-sm text-[#666] dark:text-[#a3a3a3] px-0"> <li class="flex items-center gap-1">  <a href="https://idao.fun" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">首页</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">博客</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <a href="https://idao.fun/blog/category/技术深度" class="transition hover:text-[#4d4d4d] dark:text-[#a3a3a3]">技术深度</a> </li><li class="flex items-center gap-1"> <svg class="h-3 w-3 text-[#ebebeb] dark:text-[#262626]" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> <span class="text-primary dark:text-[#ededed] hidden sm:inline" aria-current="page">Node.js v26.1.0 深度解读：FFI、后量子密码与调试器的进化</span> </li> </ol> </nav> <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://idao.fun"},{"@type":"ListItem","position":2,"name":"博客","item":"https://idao.fun/blog"},{"@type":"ListItem","position":3,"name":"技术深度","item":"https://idao.fun/blog/category/技术深度"},{"@type":"ListItem","position":4,"name":"Node.js v26.1.0 深度解读：FFI、后量子密码与调试器的进化","item":""}]}</script>  <header class="not-prose mb-8"> <h1 class="text-3xl font-bold tracking-[-0.02em] text-primary dark:text-[#ededed]">Node.js v26.1.0 深度解读：FFI、后量子密码与调试器的进化</h1> <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-[#666] dark:text-[#a3a3a3]"> <time datetime="2026-05-13T00:00:00.000Z"> 2026年5月13日 </time>  <a href="/blog/category/技术深度" class="rounded-md bg-[#fafafa] px-2.5 py-1 text-[#4d4d4d] transition hover:bg-gray-100 dark:bg-[#262626] dark:text-[#a3a3a3] dark:hover:bg-[#333]"> 技术深度 </a> </div> <div class="mt-3 flex flex-wrap gap-2"> <a href="/blog/tag/Node.js" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Node.js </a><a href="/blog/tag/FFI" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#FFI </a><a href="/blog/tag/Post-Quantum" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Post-Quantum </a><a href="/blog/tag/Cryptography" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Cryptography </a><a href="/blog/tag/Debugger" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Debugger </a><a href="/blog/tag/QUIC" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#QUIC </a><a href="/blog/tag/Test Runner" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#Test Runner </a><a href="/blog/tag/OpenSSL" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-[#4d4d4d] dark:text-[#a3a3a3] transition hover:bg-primary/20 dark:bg-[#1a1a1a]">
+#OpenSSL </a> </div> </header>  <blockquote>
+<p>Node.js v26.1.0 发布于 2026 年 5 月 7 日，由 Antoine du Hamel 发布。这是 Node.js 26 发布线进入 Current 阶段后的第一个次要版本。它不是一个”大版本”，但 <code>node:ffi</code> 模块的加入——让 JavaScript 直接调用 C 动态库——为这个已经 17 年的运行时打开了一扇全新的门。</p>
+</blockquote>
+<hr>
+<h2 id="一nodeffinodejs-的-ffi-大门打开了">一、<code>node:ffi</code>：Node.js 的 FFI 大门打开了</h2>
+<p>v26.1.0 最引人注目的新特性是 <code>node:ffi</code> 模块。FFI（Foreign Function Interface）不是什么新技术——Python 有 <code>ctypes</code>、LuaJIT 有 FFI 库、Rust 通过 <code>extern "C"</code> 天然支持。但在 Node.js 中，调用原生 C 库一直只能通过 <strong>N-API 原生插件</strong>的路径——需要写 C++ 代码、用 <code>node-gyp</code> 编译、处理跨平台 ABI 兼容性。门槛高，迭代周期长。</p>
+<p><code>node:ffi</code> 改变了这一点：<strong>在 JavaScript 中直接加载和调用动态库中的符号，不需要编译任何 C++ 代码。</strong></p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#C678DD">import</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">dlopen</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">defineFFI</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">from</span><span style="color:#98C379"> 'node:ffi'</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 定义函数签名</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> ffi</span><span style="color:#56B6C2"> =</span><span style="color:#61AFEF"> defineFFI</span><span style="color:#ABB2BF">({</span></span>
+<span class="line"><span style="color:#98C379">  'hello'</span><span style="color:#ABB2BF">: { </span></span>
+<span class="line"><span style="color:#E06C75">    result</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'void'</span><span style="color:#ABB2BF">, </span></span>
+<span class="line"><span style="color:#E06C75">    args</span><span style="color:#ABB2BF">: [], </span></span>
+<span class="line"><span style="color:#E06C75">    library</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'libhello'</span><span style="color:#ABB2BF"> </span></span>
+<span class="line"><span style="color:#ABB2BF">  },</span></span>
+<span class="line"><span style="color:#98C379">  'add'</span><span style="color:#ABB2BF">: { </span></span>
+<span class="line"><span style="color:#E06C75">    result</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'int'</span><span style="color:#ABB2BF">, </span></span>
+<span class="line"><span style="color:#E06C75">    args</span><span style="color:#ABB2BF">: [</span><span style="color:#98C379">'int'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'int'</span><span style="color:#ABB2BF">], </span></span>
+<span class="line"><span style="color:#E06C75">    library</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'libhello'</span><span style="color:#ABB2BF"> </span></span>
+<span class="line"><span style="color:#ABB2BF">  }</span></span>
+<span class="line"><span style="color:#ABB2BF">});</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 直接调用</span></span>
+<span class="line"><span style="color:#E5C07B">ffi</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">hello</span><span style="color:#ABB2BF">();               </span><span style="color:#7F848E;font-style:italic">// 调用 C 函数</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> sum</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> ffi</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">add</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">3</span><span style="color:#ABB2BF">, </span><span style="color:#D19A66">4</span><span style="color:#ABB2BF">); </span><span style="color:#7F848E;font-style:italic">// 返回 7</span></span></code></pre>
+<h3 id="安全警告不是闹着玩的">安全警告不是闹着玩的</h3>
+<p>FFI 模块的文档和发布说明反复强调同一个词：“inherently unsafe”。这不是客套话：</p>
+<ul>
+<li><strong>无效指针导致段错误</strong>：传一个野指针给 C 函数，整个进程直接崩</li>
+<li><strong>错误的函数签名让结果不可预测</strong>：如果 C 函数期望 <code>double</code> 但你传了 <code>int</code>，返回值是垃圾数据</li>
+<li><strong>释放后的内存访问（use-after-free）</strong>：C 层释放的内存，JS 侧仍然持有引用——这是经典的安全漏洞</li>
+</ul>
+<p>正因如此，<code>node:ffi</code> 需要显式启用：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#61AFEF">node</span><span style="color:#D19A66"> --experimental-ffi</span><span style="color:#98C379"> app.mjs</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 如果启用了 Permission Model，还需要</span></span>
+<span class="line"><span style="color:#61AFEF">node</span><span style="color:#D19A66"> --experimental-ffi</span><span style="color:#D19A66"> --allow-ffi</span><span style="color:#98C379"> app.mjs</span></span></code></pre>
+<h3 id="ffifunctioninfo-与-shared-buffer-优化">FFIFunctionInfo 与 Shared Buffer 优化</h3>
+<p>从 commit 记录中可以看到，在合并到主分支前，<code>node:ffi</code> 的实现经历了多轮优化：</p>
+<ul>
+<li><code>FFIFunctionInfo</code> 被实现为 <code>BaseObject</code> 子类（#63071）</li>
+<li>使用 <code>unique_ptr</code> 管理 FFI 内存，避免泄漏（#63071）</li>
+<li><code>DynamicLibrary</code> 支持 <code>Symbol.dispose</code>，可以用 <code>using</code> 语法自动释放（#62925）</li>
+<li><strong>Shared Buffer 快速路径</strong>：对数值和指针类型的参数/返回值，避免了不必要的缓冲区分配（#62918）</li>
+</ul>
+<p>最后这个优化很关键。FFI 调用中大量场景是”传两个 int，拿一个 int 回来”——纯数值运算。没有 shared buffer 优化，每次调用都得创建一个 ArrayBuffer、写数据、读结果、回收；有了快速路径，数值类型直接在栈上传递，开销接近于零。</p>
+<h3 id="适用场景">适用场景</h3>
+<p><code>node:ffi</code> 不是要替代 N-API——后者更适合复杂、高频、生产级的原生集成。FFI 的定位是”快速黏合”：</p>
+<ul>
+<li>对接一个只有 C API 的老旧硬件驱动</li>
+<li>在原型阶段快速验证一个原生算法的可行性</li>
+<li>调用系统级 API（Linux ioctl、Windows Win32 API）</li>
+<li>临时集成一个只提供 <code>.so</code>/<code>.dylib</code>/<code>.dll</code> 的闭源库</li>
+</ul>
+<hr>
+<h2 id="二后量子密码学ml-kem-和-slh-dsa">二、后量子密码学：ML-KEM 和 SLH-DSA</h2>
+<p>Node.js 在密码学支持上一直跟进得很快。v26.1.0 中，Filip Skokan 贡献了多个 Web Crypto API 的改进，其中最引人注目的两项是对 <strong>ML-KEM</strong> 和 <strong>SLH-DSA</strong> 的 JWK（JSON Web Key）支持。</p>
+<h3 id="ml-kemfips-203">ML-KEM（FIPS 203）</h3>
+<p>ML-KEM（Module-Lattice-Based Key-Encapsulation Mechanism）是美国国家标准与技术研究院（NIST）选定的后量子密钥封装标准。它在 2024 年 8 月正式定为 FIPS 203 标准。</p>
+<p>简单说，ML-KEM 解决的是”如果量子计算机能破解 RSA 和 ECDH，我们怎么安全地交换密钥”这个问题。它基于格密码学（lattice-based cryptography），目前没有已知的量子攻击算法能有效破解它。</p>
+<h3 id="slh-dsafips-205">SLH-DSA（FIPS 205）</h3>
+<p>SLH-DSA（Stateless Hash-Based Digital Signature Algorithm，原名 SPHINCS+）是无状态哈希签名算法，FIPS 205 标准。它的安全性依赖于哈希函数的抗碰撞性——这是一个经过数十年密码分析检验的安全性假设。</p>
+<h3 id="jwk-集成">JWK 集成</h3>
+<p>Node.js 在 v26.1.0 中为这两种算法增加了 JWK 格式的导入/导出支持：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> publicKey</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> await</span><span style="color:#E5C07B"> crypto</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">subtle</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">importKey</span><span style="color:#ABB2BF">(</span></span>
+<span class="line"><span style="color:#98C379">  'jwk'</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#E06C75">  jwkData</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#ABB2BF">  { </span><span style="color:#E06C75">name</span><span style="color:#ABB2BF">: </span><span style="color:#98C379">'ML-KEM-768'</span><span style="color:#ABB2BF"> },</span></span>
+<span class="line"><span style="color:#D19A66">  true</span><span style="color:#ABB2BF">,</span></span>
+<span class="line"><span style="color:#ABB2BF">  [</span><span style="color:#98C379">'wrapKey'</span><span style="color:#ABB2BF">]</span></span>
+<span class="line"><span style="color:#ABB2BF">);</span></span></code></pre>
+<p>这意味着 JavaScript 生态的应用可以用标准的 JWK 格式交换后量子密钥，而不需要自己设计序列化格式。对于合规性要求高、生命周期长的系统（PKI、代码签名、长期存储加密）来说，这是开始<strong>为量子计算时代做准备</strong>的实用基础设施。</p>
+<hr>
+<h2 id="三调试器不再需要编辑代码的运行时探针">三、调试器：不再需要编辑代码的运行时探针</h2>
+<p><code>node inspect</code> 调试器在 v26.1.0 中获得了一个 Joyee Cheung 贡献的新能力：<strong>编辑无关的运行时表达式求值</strong>。</p>
+<h3 id="为什么重要">为什么重要</h3>
+<p>传统的调试流程是：发现问题 → 修改代码（加 <code>console.log</code>）→ 重启应用 → 复现问题。这个过程在大规模、有状态的应用（如数据库连接池已经建立的服务）中代价很高——重启意味着丢失运行时上下文。</p>
+<p>新引入的 ProbeInspectorSession 模式允许调试器在运行时动态注入表达式，而不需要修改源文件。它通过 Chrome DevTools Protocol 的 <code>Runtime.evaluate</code> 能力实现，但做了更友好的 CLI 封装：</p>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#61AFEF">node</span><span style="color:#98C379"> inspect</span><span style="color:#98C379"> app.mjs</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># 在断点处：</span></span>
+<span class="line"><span style="color:#61AFEF">debug</span><span style="color:#ABB2BF">> </span><span style="color:#98C379">.probe</span><span style="color:#98C379"> "userSession.getCurrentUser()"</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic"># Node.js 在当前上下文中执行表达式，返回结果</span></span></code></pre>
+<p>这个功能在后端调试场景中的价值明显——不需要部署新代码就能探查运行时状态。生产环境谨慎使用，但开发阶段的调试效率会明显提升。</p>
+<hr>
+<h2 id="四测试框架走向成熟">四、测试框架走向成熟</h2>
+<p>Node.js 内置的 <code>node:test</code> 在 v26.1.0 中获得多项改进，使它越来越接近一个独立的测试框架，而不是”那个顺便附带的测试库”。</p>
+<h3 id="测试顺序随机化">测试顺序随机化</h3>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#7F848E;font-style:italic">// 让测试以随机顺序执行，检测顺序依赖</span></span>
+<span class="line"><span style="color:#E06C75">node</span><span style="color:#56B6C2"> --</span><span style="color:#E06C75">test</span><span style="color:#56B6C2"> --</span><span style="color:#E06C75">test</span><span style="color:#56B6C2">-</span><span style="color:#E06C75">randomize</span></span></code></pre>
+<p>这个由 Pietro Marchini 贡献的特性（#61747）对测试质量有直接改善。测试之间的顺序依赖是一种很难 debug 的 bug——当测试 A 修改了全局状态而测试 B 依赖于 A 执行后的状态，测试顺序每次固定的情况下可能从未暴露问题。随机化执行顺序就是为了捕获这类测试。</p>
+<h3 id="mock-timers-与-abortsignal">Mock Timers 与 AbortSignal</h3>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#C678DD">import</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">mock</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">describe</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75">it</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">from</span><span style="color:#98C379"> 'node:test'</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#61AFEF">describe</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'timeout handling'</span><span style="color:#ABB2BF">, () </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#61AFEF">  it</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'should timeout after 5s'</span><span style="color:#ABB2BF">, { </span><span style="color:#E06C75">concurrency</span><span style="color:#ABB2BF">: </span><span style="color:#D19A66">true</span><span style="color:#ABB2BF"> }, </span><span style="color:#C678DD">async</span><span style="color:#ABB2BF"> (</span><span style="color:#E06C75;font-style:italic">t</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // 模拟计时器</span></span>
+<span class="line"><span style="color:#E5C07B">    t</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">mock</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">timers</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">enable</span><span style="color:#ABB2BF">();</span></span>
+<span class="line"><span style="color:#ABB2BF">  </span></span>
+<span class="line"><span style="color:#C678DD">    const</span><span style="color:#E5C07B"> controller</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> new</span><span style="color:#61AFEF"> AbortController</span><span style="color:#ABB2BF">();</span></span>
+<span class="line"><span style="color:#C678DD">    const</span><span style="color:#E5C07B"> timeout</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> AbortSignal</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">timeout</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">5000</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#ABB2BF">  </span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // 计时器模拟覆盖 AbortSignal.timeout</span></span>
+<span class="line"><span style="color:#E5C07B">    t</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">mock</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">timers</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">tick</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">5000</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#ABB2BF">  </span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">    // 断言</span></span>
+<span class="line"><span style="color:#ABB2BF">  });</span></span>
+<span class="line"><span style="color:#ABB2BF">});</span></span></code></pre>
+<p>mock timers 现在能覆盖 <code>AbortSignal.timeout()</code>——这是 <code>node:test</code> 测试异步超时场景的关键能力。此前 mock timers 只能模拟 <code>setTimeout</code>/<code>setInterval</code>，但 <code>AbortSignal.timeout</code> 使用独立的内部计时器，无法被 mock 捕获。</p>
+<h3 id="mock-timeout-api-对齐">Mock Timeout API 对齐</h3>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#7F848E;font-style:italic">// 设置 mock 调用验证的超时时间</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> fn</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> t</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">mock</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">fn</span><span style="color:#ABB2BF">();</span></span>
+<span class="line"><span style="color:#E5C07B">fn</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">mock</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">timeout</span><span style="color:#ABB2BF">(</span><span style="color:#D19A66">1000</span><span style="color:#ABB2BF">);  </span><span style="color:#7F848E;font-style:italic">// 等待 1 秒后如果未调用则超时</span></span></code></pre>
+<hr>
+<h2 id="五基础设施升级一个常规版本的依赖更新密度">五、基础设施升级：一个”常规”版本的依赖更新密度</h2>
+<p>v26.1.0 的 deps 更新列表相当密集：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>依赖</th><th>版本</th><th>亮点</th></tr></thead><tbody><tr><td><strong>OpenSSL</strong></td><td>3.5.6</td><td>安全修复，性能改进</td></tr><tr><td><strong>V8</strong></td><td>14.6.202.34</td><td>Chromium 134 基线，ASM/WebAssembly 改进</td></tr><tr><td><strong>npm</strong></td><td>11.13.0</td><td>包管理器持续更新</td></tr><tr><td><strong>undici</strong></td><td>8.2.0</td><td>HTTP 客户端，连接管理改进</td></tr><tr><td><strong>nghttp2</strong></td><td>1.69.0</td><td>H2 协议栈更新</td></tr><tr><td><strong>llhttp</strong></td><td>9.4.1</td><td>HTTP 解析器</td></tr><tr><td><strong>SQLite</strong></td><td>3.53.0</td><td>同上个版本 Bun 也升级到的版本</td></tr><tr><td><strong>simdjson</strong></td><td>4.6.1</td><td>JSON 解析加速</td></tr><tr><td><strong>ngtcp2</strong></td><td>1.22.0</td><td>QUIC 传输层</td></tr><tr><td><strong>corepack</strong></td><td>0.34.7</td><td>包管理器管理器</td></tr><tr><td><strong>timezone</strong></td><td>2026b</td><td>夏令时和时区更新</td></tr></tbody></table>
+<h3 id="perfetto性能追踪的新基础">perfetto：性能追踪的新基础</h3>
+<p>值得单独提及的是 perfetto 的集成（#62397）。perfetto 是 Google 开发的性能追踪框架，被 Android 和 Chrome 广泛使用。Node.js 现在集成了 perfetto 构建文件和依赖（54.0 版本），这意味着未来 Node.js 的原生性能追踪能力——目前通过 <code>--trace-event-enabled</code> 或 <code>perf_hooks</code> 暴露——可能会走 perfetto 管道。</p>
+<p>对于需要深度性能分析的场景（火焰图、跟踪事件流、GC 分析），perfetto 集成意味着更丰富的追踪数据和更好的工具链兼容性。</p>
+<hr>
+<h2 id="六sqlite序列化与列名优化">六、SQLite：序列化与列名优化</h2>
+<p><code>node:sqlite</code> 模块在上个版本引入后，v26.1.0 带来了两项重要改进：</p>
+<h3 id="serialize--deserialize">serialize() / deserialize()</h3>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#C678DD">import</span><span style="color:#ABB2BF"> { </span><span style="color:#E06C75">DatabaseSync</span><span style="color:#ABB2BF"> } </span><span style="color:#C678DD">from</span><span style="color:#98C379"> 'node:sqlite'</span><span style="color:#ABB2BF">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> db</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> new</span><span style="color:#61AFEF"> DatabaseSync</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">':memory:'</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#E5C07B">db</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">exec</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">`CREATE TABLE data (key TEXT, value TEXT)`</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#E5C07B">db</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">prepare</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">`INSERT INTO data VALUES (?, ?)`</span><span style="color:#ABB2BF">).</span><span style="color:#61AFEF">run</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'hello'</span><span style="color:#ABB2BF">, </span><span style="color:#98C379">'world'</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 将整个数据库序列化为 Buffer</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> buffer</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> db</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">serialize</span><span style="color:#ABB2BF">();</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// buffer 包含完整的数据库状态——schema + 数据</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// 从 Buffer 还原</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> db2</span><span style="color:#56B6C2"> =</span><span style="color:#C678DD"> new</span><span style="color:#61AFEF"> DatabaseSync</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">':memory:'</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#E5C07B">db2</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">deserialize</span><span style="color:#ABB2BF">(</span><span style="color:#E06C75">buffer</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> row</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> db2</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">prepare</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">`SELECT * FROM data`</span><span style="color:#ABB2BF">).</span><span style="color:#61AFEF">all</span><span style="color:#ABB2BF">();</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">// [{ key: 'hello', value: 'world' }]</span></span></code></pre>
+<p>这个功能在数据传输、缓存、快照场景中很实用——比如将内存数据库的内容序列化后发送到另一个进程。</p>
+<h3 id="列名内化">列名内化</h3>
+<p>Ali Hassan 贡献的优化（#61954）将 ASCII 类型列的列名使用 <code>OneByte</code> 字符串内化（internalize）。在 SQLite 查询大量列时，这个优化减少了字符串比较和哈希的开销——对高吞吐的数据库查询有意义。</p>
+<hr>
+<h2 id="七http-与安全相关">七、HTTP 与安全相关</h2>
+<h3 id="clientrequest-options-merge-强化">ClientRequest options merge 强化</h3>
+<p>Matteo Collina 修复了 <code>ClientRequest</code> 构造时的 options 合并逻辑（#63082）。此前在某些边缘情况下，用户提供的 options 可能会与默认值产生非预期的合并行为——特别是 <code>headers</code> 对象可能被就地修改而不是被拷贝。</p>
+<h3 id="reqsignal-加入-incomingmessage">req.signal 加入 IncomingMessage</h3>
+<pre class="astro-code one-dark-pro" style="background-color:#282c34;color:#abb2bf; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#C678DD">const</span><span style="color:#E5C07B"> server</span><span style="color:#56B6C2"> =</span><span style="color:#E5C07B"> http</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">createServer</span><span style="color:#ABB2BF">((</span><span style="color:#E06C75;font-style:italic">req</span><span style="color:#ABB2BF">, </span><span style="color:#E06C75;font-style:italic">res</span><span style="color:#ABB2BF">) </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#7F848E;font-style:italic">  // req.signal 在请求被中止时触发</span></span>
+<span class="line"><span style="color:#E5C07B">  req</span><span style="color:#ABB2BF">.</span><span style="color:#E5C07B">signal</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">addEventListener</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'abort'</span><span style="color:#ABB2BF">, () </span><span style="color:#C678DD">=></span><span style="color:#ABB2BF"> {</span></span>
+<span class="line"><span style="color:#E5C07B">    console</span><span style="color:#ABB2BF">.</span><span style="color:#61AFEF">log</span><span style="color:#ABB2BF">(</span><span style="color:#98C379">'请求被客户端取消'</span><span style="color:#ABB2BF">);</span></span>
+<span class="line"><span style="color:#61AFEF">    cleanupExpensiveOperation</span><span style="color:#ABB2BF">();</span></span>
+<span class="line"><span style="color:#ABB2BF">  });</span></span>
+<span class="line"><span style="color:#ABB2BF">});</span></span></code></pre>
+<p><code>IncomingMessage</code> 现在有 <code>signal</code> 属性（AbortSignal），当请求被客户端断开时触发。这对需要清理资源的场景很有用——比如用户取消上传后停止处理。</p>
+<h3 id="no_proxy-后缀匹配修复">no_proxy 后缀匹配修复</h3>
+<p>HTTP 代理的 <code>no_proxy</code> 配置现在正确支持前缀带点号的域名匹配（#62333）。<code>no_proxy=.example.com</code> 现在可以正确匹配 <code>sub.example.com</code>——此前实现只做了简单的前缀匹配。</p>
+<hr>
+<h2 id="八quic连接迁移的基础设施">八、QUIC：连接迁移的基础设施</h2>
+<p>Node.js 的 QUIC 实现（<code>node:quic</code>）在本版本获得了多项底层改进：</p>
+<ul>
+<li><strong><code>QuicEndpoint.listening</code> 和 <code>QuicStream.destroy()</code></strong>：暴露连接状态和流的生命周期控制（#62648）</li>
+<li><strong>多 ALPN 协商</strong>：服务器可以在同一个端点监听多个应用层协议（#62620）</li>
+<li><strong>TLS 上下文改进 + SNI 支持</strong>：基于服务器名称指示选择不同的 TLS 证书（#62620）</li>
+<li><strong>Token 验证修复</strong>：处理超时 token 的边界情况（#62620）</li>
+<li><strong>Arena 分配</strong>：数据包使用 arena 内存池分配，减少碎片和分配开销（#62589）</li>
+<li><strong>Rapidhash</strong>：替换 xxHash，用于快速哈希计算（#62620）</li>
+</ul>
+<p>这些改进指向一个方向：Node.js 的 QUIC 正在从”能用”走向”适合生产”。特别值得关注的是 QUIC 作为 HTTP/3（<code>node:http3</code> 尚在开发中）的传输层——QUIC + HTTP/3 的全栈支持对实时通信和移动场景会有显著改善。</p>
+<hr>
+<h2 id="九其他值得关注的变更">九、其他值得关注的变更</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>变更</th><th>PR</th><th>作者</th><th>说明</th></tr></thead><tbody><tr><td><code>randomUUIDv7()</code></td><td>#62553</td><td>nabeel378</td><td>UUID v7 格式</td></tr><tr><td><code>fs.stat()</code> 支持 <code>signal</code></td><td>#57775</td><td>Mert Can Altin</td><td>支持 AbortSignal 取消</td></tr><tr><td><code>statfs</code> 暴露 <code>frsize</code></td><td>#62277</td><td>Jinho Jang</td><td>文件系统片段大小</td></tr><tr><td><code>buffer.indexOf/lastIndexOf</code> <code>end</code> 参数</td><td>#62390</td><td>Robert Nagy</td><td>限定搜索范围</td></tr><tr><td><code>util.styleText</code> 支持十六进制颜色</td><td>#61556</td><td>Guilherme Araújo</td><td><code>styleText('color:#ff0000', 'red')</code></td></tr><tr><td><code>duplexPair</code> 传播销毁</td><td>#61098</td><td>Ahmed Elhor</td><td>解决背压+销毁的竞态</td></tr><tr><td><code>--enable-all-experimentals</code></td><td>#62755</td><td>Paolo Insogna</td><td>一键启用所有实验特性</td></tr><tr><td>空 <code>--experimental-config-file</code></td><td>#61610</td><td>Marco Ippolito</td><td>配置文件的灵活处理</td></tr><tr><td><code>ERR_REQUIRE_ESM_RACE_CONDITION</code></td><td>#62462</td><td>Antoine du Hamel</td><td>检测混合模块加载竞态</td></tr><tr><td><code>glob()</code> 支持 <code>followSymlinks</code></td><td>#62695</td><td>Matteo Collina</td><td>控制符号链接行为</td></tr><tr><td>Win x64 PGO</td><td>#62761</td><td>Stefan Stojanovic</td><td>Windows x64 的 PGO 优化</td></tr><tr><td><code>napi_create_external_sharedarraybuffer</code></td><td>#62623</td><td>Ben Noordhuis</td><td>N-API 扩展</td></tr></tbody></table>
+<hr>
+<h2 id="十这个版本意味着什么">十、这个版本意味着什么</h2>
+<p>回顾 v26.1.0 的全部变更，它不是一个”头条特性”驱动的版本。FFI 模块是唯一的大新闻，但真正有意思的是那些基础设施层面的信号：</p>
+<p>第一，<strong>Node.js 正在认真对待后量子密码学。</strong> ML-KEM 和 SLH-DSA 的 JWK 支持不是什么”实验性标志”下的玩具——它们是在真实的 Web Crypto API 标准接口中实现的。对于安全敏感的应用，开始接触和测试后量子算法不再需要额外安装依赖。</p>
+<p>第二，<strong>内置测试框架在加速成熟。</strong> 测试随机化、mock timers 对 AbortSignal.timeout 的覆盖——这些功能表明 Node.js 团队正在严肃地把测试基础设施当作一等公民，而不是需要”第三方框架补课”的薄弱环节。</p>
+<p>第三，<strong>perfetto 的引入暗示着性能工具的进化。</strong> V8 已经有了内置的 tracing 支持，Node.js 过去通过 <code>--trace-event-enabled</code> 暴露一部分，但 perfetto 级别的集成意味着更丰富的 trace 事件、更好的工具链兼容性。这是 Node.js 在高性能服务端场景（游戏、实时通信、高频交易）中竞争的基础设施准备。</p>
+<p>第四，<strong>QUIC/HTTP3 的工程投入没有减速。</strong> 多 ALPN、SNI 支持、arena 分配——这些都是生产级 QUIC 实现需要的工程细节。当 <code>node:http3</code> 模块最终稳定时，Node.js 可能成为第一个”原生支持 HTTP/3 的服务端运行时”，而不需要前面放一个 Caddy 或 Nginx。</p>
+<p>v26.1.0 是一个”积累型”版本。没有突破性的语法变更，没有框架级的新功能。但 FFI 打开了原生调用的通路，后量子密码学为未来做好准备，QUIC 在继续深入——这些方向叠加起来，指向的是一幅更大的图景。</p>
+<blockquote>
+<p>原创技术博客 · 开源项目分享 · AI全栈创作社区  <a href="https://idao.fun">idao.fun</a></p>
+</blockquote>   </article>  </main> <footer class="shadow-border bg-[#fafafa] dark:bg-[#0a0a0a] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"> <div class="mx-auto max-w-5xl px-4 py-12"> <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">iDao技术魔方</h3> <p class="text-sm leading-relaxed text-[#4d4d4d] dark:text-[#a3a3a3]">一枚全职独立开发者，懂全栈、爱开源、专注做优质技术内容，坐标成都。原创全栈技术内容，开源项目分享。</p> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">快速链接</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/blog" class="transition hover:text-primary dark:hover:text-[#ededed]">技术博客</a></li> <li><a href="/projects" class="transition hover:text-primary dark:hover:text-[#ededed]">开源项目</a></li> <li><a href="/utils" class="transition hover:text-primary dark:hover:text-[#ededed]">工具集</a></li> <li><a href="/ai" class="transition hover:text-primary dark:hover:text-[#ededed]">AI精选</a></li> <li><a href="/service" class="transition hover:text-primary dark:hover:text-[#ededed]">技术服务</a></li> <li><a href="/about" class="transition hover:text-primary dark:hover:text-[#ededed]">关于博主</a></li> <li><a href="/links" class="transition hover:text-primary dark:hover:text-[#ededed]">友情链接</a></li> <li><a href="/sponsor" class="transition hover:text-primary dark:hover:text-[#ededed]">赞助支持</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">联系</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="https://github.com/idao-cube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">GitHub</a></li> <li><a href="https://x.com/idaocube" class="transition hover:text-primary dark:hover:text-[#ededed]" target="_blank" rel="noopener">Twitter</a></li> <li><a href="mailto:hi@idao.fun" class="transition hover:text-primary dark:hover:text-[#ededed]">hi@idao.fun</a></li> </ul> </div> <div> <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-[#a3a3a3]">其他</h3> <ul class="space-y-2 text-sm text-[#4d4d4d] dark:text-[#a3a3a3]"> <li><a href="/sitemap" class="transition hover:text-primary dark:hover:text-[#ededed]">站点地图</a></li> <li><a href="/privacy" class="transition hover:text-primary dark:hover:text-[#ededed]">隐私政策</a></li> <li><a href="/terms" class="transition hover:text-primary dark:hover:text-[#ededed]">服务条款</a></li> <li><a href="/search" class="transition hover:text-primary dark:hover:text-[#ededed]">站内搜索</a></li> </ul> </div> </div> <div class="mt-8 border-t border-gray-200 pt-6 text-center text-xs text-gray-500 dark:border-[#262626]"> <p>&copy; 2026 iDao技术魔方. All rights reserved. </p> <p class="pt-2">玩转技术魔方，创造数字未来 </p> <p class="pt-2">AI 友好索引：<a href="/llms.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms.txt</a> · <a href="/llms-full.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">llms-full.txt</a> · <a href="/sitemap.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">sitemap.xml</a> · <a href="/urls.txt" class="transition hover:text-primary dark:hover:text-[#ededed]">urls.txt</a> · <a href="/rss.xml" class="transition hover:text-primary dark:hover:text-[#ededed]">RSS</a></p> </div> </div> </footer> </body></html>
